@@ -10,7 +10,7 @@ const Hero = () => {
         <div className="grid md:grid-cols-2 gap-12 items-center">
           <div className="relative z-10 animate-fadeIn">
             <p className="text-primary font-medium mb-4">Fitness Club</p>
-            <h1 className="text-5xl md:text-6xl font-bold mb-6 hero-text-gradient">
+            <h1 id="hero" className="text-5xl md:text-6xl font-bold mb-6 hero-text-gradient">
               Sweat, Smile
               <br />
               And Repeat
