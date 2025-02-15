@@ -34,7 +34,7 @@ const Navbar = () => {
           {/* Desktop Menu */}
           <div className="hidden md:flex items-center space-x-8">
             <a
-              href="#"
+              href="#hero"
               className="text-gray-600 hover:text-primary transition-colors"
             >
               Home
@@ -63,19 +63,19 @@ const Navbar = () => {
                   <div className="w-full max-w-md px-4 py-4">
                     <div className="flex flex-col gap-4 ">
                       <a
-                        href="#"
+                        href="#hero"
                         className="text-gray-800 font-bold hover:text-primary transition-colors"
                       >
                         Home
                       </a>
                       <a
-                        href="#"
+                        href="#training"
                         className="text-gray-800 font-bold hover:text-primary transition-colors"
                       >
                         Training
                       </a>
                       <a
-                        href="#"
+                        href="#footer"
                         className="text-gray-800 font-bold hover:text-primary transition-colors"
                       >
                         Contact
