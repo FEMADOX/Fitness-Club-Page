@@ -40,13 +40,13 @@ const Navbar = () => {
               Home
             </a>
             <a
-              href="#"
+              href="#training"
               className="text-gray-600 hover:text-primary transition-colors"
             >
               Training
             </a>
             <a
-              href="#"
+              href="#footer"
               className="text-gray-600 hover:text-primary transition-colors"
             >
               Contact
