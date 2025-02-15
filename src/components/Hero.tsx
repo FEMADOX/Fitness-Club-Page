@@ -5,7 +5,7 @@ const Hero = () => {
   const isMobile = useIsMobile();
 
   return (
-    <div className="relative min-h-screen bg-white overflow-hidden">
+    <section className="relative min-h-screen bg-white overflow-hidden">
       <div className="container mx-auto px-4 pt-32 pb-20">
         <div className="grid md:grid-cols-2 gap-12 items-center">
           <div className="relative z-10 animate-fadeIn">
@@ -39,7 +39,7 @@ const Hero = () => {
           </div>
         </div>
       </div>
-    </div>
+    </section>
   );
 };
 
