@@ -9,7 +9,7 @@ class IsUserOrAdmin(BasePermission):
     def has_permission(self, request: Request, view: APIView) -> bool:
         try:
             user = get_user_model().objects.get(pk=request.user.pk)
-            user_id = int(view.kwargs.get("pk"))
+            user_id = view.kwargs.get("pk")
 
             if not user_id:
                 return user.is_staff
