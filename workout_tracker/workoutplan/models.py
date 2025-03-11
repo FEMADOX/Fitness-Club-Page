@@ -1,3 +1,4 @@
+from django.contrib.auth.models import User
 from django.db import models
 from django.utils import timezone
 
@@ -72,6 +73,9 @@ class WorkoutPlan(models.Model):
         ("PENDING", "Pending"),
     ]
 
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE,
+    )
     workouts = models.ManyToManyField(Workout, related_name="workout_plans")
     description = models.TextField(blank=True, default="No description")
     created = models.DateTimeField(auto_now_add=True)
