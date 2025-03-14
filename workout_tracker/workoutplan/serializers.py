@@ -2,23 +2,6 @@ from rest_framework import serializers
 
 from workoutplan.models import Workout, WorkoutPlan
 
-# class CategorySerializer(serializers.ModelSerializer):
-#     class Meta:  # type: ignore[]
-#         model = Category
-#         fields = "__all__"
-
-
-# class MuscleGroupSerializer(serializers.ModelSerializer):
-#     class Meta:  # type: ignore[]
-#         model = MuscleGroup
-#         fields = "__all__"
-
-
-# class ExerciseSerializer(serializers.ModelSerializer):
-#     class Meta:  # type: ignore[]
-#         model = Exercise
-#         fields = "__all__"
-
 
 class WorkoutSerializer(serializers.ModelSerializer):
     class Meta:  # type: ignore[]
@@ -27,7 +10,7 @@ class WorkoutSerializer(serializers.ModelSerializer):
 
 
 class WorkoutPlanSerializer(serializers.ModelSerializer):
-    workouts = WorkoutSerializer(many=True)
+    workouts = WorkoutSerializer(many=True, allow_empty=False)
 
     class Meta:  # type: ignore[]
         model = WorkoutPlan
