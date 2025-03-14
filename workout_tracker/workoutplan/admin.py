@@ -22,14 +22,14 @@ class ExerciseAdmin(admin.ModelAdmin):
 
 @admin.register(Workout)
 class WorkoutAdmin(admin.ModelAdmin):
-    list_display = ["exercise", "repetitions", "sets", "weight"]
+    list_display = ["id", "exercise", "repetitions", "sets", "weight"]
     list_filter = ["exercise"]
     search_fields = ["exercise"]
 
 
 @admin.register(WorkoutPlan)
 class WorkoutPlanAdmin(admin.ModelAdmin):
-    list_display = ["status", "schedule_date"]
+    list_display = ["id", "user", "status", "schedule_date"]
     list_filter = ["status"]
     search_fields = ["workouts"]
     readonly_fields = ["created", "updated"]

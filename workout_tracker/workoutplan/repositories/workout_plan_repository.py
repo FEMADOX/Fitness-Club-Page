@@ -1,23 +1,46 @@
-from django.contrib.auth.models import User
+from django.contrib.auth.models import AbstractBaseUser, User
 from django.db.models.manager import BaseManager
 
 from workoutplan.models import WorkoutPlan
 
 
 class WorkoutPlanRepository:
-
     @staticmethod
-    def get_all() -> BaseManager[WorkoutPlan]:
+    def get_all(
+        user: User | AbstractBaseUser | None = None,
+    ) -> BaseManager[WorkoutPlan]:
+        if user:
+            return WorkoutPlan.objects.filter(user=user)
         return WorkoutPlan.objects.all()
 
     @staticmethod
-    def filter_by_status(status: str) -> BaseManager[WorkoutPlan]:
-        return WorkoutPlan.objects.filter(status=status)
+    def get_workoutplan(
+        workoutplan_pk: int,
+        user: User | AbstractBaseUser,
+    ) -> WorkoutPlan:
+        return WorkoutPlan.objects.filter(user=user).get(pk=workoutplan_pk)
 
     @staticmethod
     def create(**kwargs: dict) -> WorkoutPlan:
         return WorkoutPlan.objects.create(**kwargs)
 
     @staticmethod
-    def get_by_user(user: User) -> BaseManager[WorkoutPlan]:
-        return WorkoutPlan.objects.filter(user=user)
+    def filter_by_status(
+        status: str,
+        user: User | AbstractBaseUser,
+    ) -> BaseManager[WorkoutPlan]:
+        return WorkoutPlanRepository.get_all(user).filter(status=status)
+
+    @staticmethod
+    def workoutplan_exist(workoutplan_pk: int) -> bool:
+        try:
+            WorkoutPlan.objects.get(pk=workoutplan_pk)
+            return True
+        except WorkoutPlan.DoesNotExist:
+            return False
+
+    @staticmethod
+    def is_user_owner(user: User | AbstractBaseUser, workoutplan_pk: int) -> bool:
+        if user.workoutplan_set.filter(pk=workoutplan_pk).exists():  # type: ignore[]
+            return True
+        return isinstance(user, User) and user.is_staff
