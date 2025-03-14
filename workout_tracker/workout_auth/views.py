@@ -1,6 +1,6 @@
 from django.contrib.auth import get_user_model
 from rest_framework import generics, status, viewsets
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.permissions import AllowAny
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework_simplejwt.authentication import JWTAuthentication
@@ -27,16 +27,16 @@ class SignUpView(generics.CreateAPIView):
 
     def post(self, request: Request) -> Response:
         serializer = self.get_serializer(data=request.data)
-        if serializer.is_valid():
-            user = serializer.save()
-            return Response(
-                {
-                    "user": UserSerializer(user).data,
-                    "message": "User Created Successfully",
-                },
-                status.HTTP_201_CREATED,
-            )
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        serializer.is_valid(raise_exception=True)
+
+        user = serializer.save()
+        return Response(
+            {
+                "user": UserSerializer(user).data,
+                "message": "User Created Successfully",
+            },
+            status.HTTP_201_CREATED,
+        )
 
 
 class LoginView(TokenObtainPairView):
@@ -47,7 +47,7 @@ class LoginView(TokenObtainPairView):
 class LogoutView(generics.GenericAPIView):
     serializer_class = CustomTokenRefreshSerializer
     authentication_classes = [JWTAuthentication]
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsUserOrAdmin]
 
     def post(self, request: Request) -> Response:
         try:
