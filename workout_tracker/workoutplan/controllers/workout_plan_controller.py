@@ -5,7 +5,7 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
-from workoutplan.exceptions import KwargIntException
+from common.exceptions import KwargIntException
 from workoutplan.serializers import WorkoutPlanSerializer
 from workoutplan.services.workout_plan_service import (
     WorkoutPlanService,
@@ -21,7 +21,7 @@ class WorkoutPlanViewSet(viewsets.ModelViewSet):
     def list(self, request: Request) -> Response:
         user = get_user_model().objects.get(pk=request.user.pk)
         status_filter = request.query_params.get("status")
-        workout_plans = WorkoutPlanService.get_all_workout_plans_filtered(
+        workout_plans = WorkoutPlanService.workout_plans_by_status(
             status_filter,
             user,
         )
@@ -34,21 +34,13 @@ class WorkoutPlanViewSet(viewsets.ModelViewSet):
         user = get_user_model().objects.get(pk=request.user.pk)
 
         try:
-            workoutplan_pk = int(kwargs["pk"])  # type: ignore[]
+            pk = int(kwargs["pk"])  # type: ignore[]
         except ValueError as error:
             raise KwargIntException from error
 
-        response = WorkoutPlanService.user_owner_workoutplan_validation(
-            user,
-            workoutplan_pk,
-        )
-
-        if not response["success"]:
-            return Response(response["message"], int(response["status"]))
-
         workoutplan = WorkoutPlanService.get_workout_plan_of_user(
             user,
-            workoutplan_pk,
+            pk,
         )
         serializer = self.get_serializer(workoutplan)
 
@@ -62,7 +54,7 @@ class WorkoutPlanViewSet(viewsets.ModelViewSet):
 
         user = get_user_model().objects.get(pk=request.user.pk)
 
-        response = WorkoutPlanService.create_workout_plan(
+        response = WorkoutPlanService.create(
             data,
             user,
         )

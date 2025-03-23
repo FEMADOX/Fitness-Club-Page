@@ -24,3 +24,6 @@ dev = [
     "ipython>=9.0.1",
     "ruff>=0.9.7",
 ]
+
+[tool.ruff.lint]
+exclude = [".venv"]
