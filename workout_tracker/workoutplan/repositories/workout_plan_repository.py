@@ -2,6 +2,7 @@ from typing import Any
 
 from django.contrib.auth.models import AbstractBaseUser, User
 from django.db.models.manager import BaseManager
+from django.utils import timezone
 
 from common.exceptions import (
     ExerciseDoesntExistException,
@@ -17,7 +18,32 @@ from workoutplan.models import Exercise, Workout, WorkoutPlan
 class WorkoutPlanRepository:
     @staticmethod
     def create(**kwargs: Any) -> WorkoutPlan:  # noqa: ANN401
-        return WorkoutPlan.objects.create(**kwargs)
+        kwargs_dic = next(iter(kwargs.values()))
+        user, workouts, date, status = kwargs_dic.values()
+        UserRepository.user_exist(user.pk)
+        workout_plan = WorkoutPlan.objects.create(
+            user=user,
+            schedule_date=date or timezone.now(),
+            status=status or "ACTIVE",
+        )
+        Workout.objects.bulk_create(workouts)
+        workout_plan.workouts.add(*workouts)
+
+        return workout_plan
+
+    @staticmethod
+    def update(workout_plan: WorkoutPlan, **kwargs: Any) -> WorkoutPlan:  # noqa: ANN401
+        kwargs_dic = next(iter(kwargs.values()))
+        updated_workouts, updated_date, updated_status = kwargs_dic.values()
+
+        Workout.objects.bulk_create(updated_workouts)
+        workout_plan.workouts.clear()
+        workout_plan.workouts.add(*updated_workouts)
+        workout_plan.schedule_date = updated_date or timezone.now()
+        workout_plan.status = updated_status or "ACTIVE"
+        workout_plan.save()
+
+        return workout_plan
 
     # Searching
     @staticmethod
@@ -92,6 +118,12 @@ class WorkoutRepository:
 
 
 class ExerciseRepository:
+    @staticmethod
+    def get_exercises_by_workouts(workouts: list) -> dict[Any, Exercise]:
+        exercises_pk = [workout_data["exercise"] for workout_data in workouts]
+        [ExerciseRepository.exercise_exist(pk) for pk in exercises_pk]
+        return Exercise.objects.in_bulk(exercises_pk)
+
     @staticmethod
     def exercise_exist(pk: int) -> None:
         try:

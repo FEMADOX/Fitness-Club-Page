@@ -3,14 +3,13 @@ from typing import Any
 from django.contrib.auth.models import AbstractUser, User
 from django.db.models import Count, F, Max, QuerySet, Sum
 from django.db.models.manager import BaseManager
-from django.utils import timezone
-from rest_framework import status
 
 from common.exceptions import (
     NoWorkoutsWithExerciseException,
 )
-from workoutplan.models import Exercise, Workout, WorkoutPlan
+from workoutplan.models import Workout, WorkoutPlan
 from workoutplan.repositories.workout_plan_repository import (
+    ExerciseRepository,
     WorkoutPlanRepository,
     WorkoutRepository,
 )
@@ -46,24 +45,57 @@ class WorkoutPlanService:
 
     @staticmethod
     def create(
-        request: dict,
+        request: dict[str, Any],
         user: User | AbstractUser,
-    ) -> dict[str, Any]:
-        workouts_data = request["workouts"]
+    ) -> WorkoutPlan:
+        workout_plan_user = user
         workout_plan_date = request.get("schedule_date")
         workout_plan_status = request.get("status")
-        workout_plan_user = user
 
-        exercises_id = [workout_data["exercise"] for workout_data in workouts_data]
-        exercises = Exercise.objects.in_bulk(exercises_id)
+        workouts_data = request["workouts"]
 
-        workout_plan = WorkoutPlanRepository.create(
-            user=workout_plan_user,
-            schedule_date=workout_plan_date or timezone.now(),
-            status=workout_plan_status or "ACTIVE",
+        workouts = WorkoutPlanService.generate_workouts_from_request(workouts_data)
+
+        return WorkoutPlanRepository.create(
+            kwargs={
+                "user": workout_plan_user,
+                "workouts": workouts,
+                "updated_date": workout_plan_date,
+                "updated_status": workout_plan_status,
+            },
         )
 
-        workouts = [
+    @staticmethod
+    def update(
+        request: dict[str, Any],
+        user: User | AbstractUser,
+        pk: int,
+    ) -> WorkoutPlan:
+        WorkoutPlanRepository.workoutplan_exist(pk)
+        workout_plan = WorkoutPlanRepository.get_workoutplan(pk, user)
+
+        workout_plan_date = request.get("schedule_date")
+        workout_plan_status = request.get("status")
+
+        workouts_data = request["workouts"]
+
+        workouts = WorkoutPlanService.generate_workouts_from_request(workouts_data)
+
+        return WorkoutPlanRepository.update(
+            workout_plan,
+            kwargs={
+                "workouts": workouts,
+                "updated_date": workout_plan_date,
+                "updated_status": workout_plan_status,
+            },
+        )
+
+    @staticmethod
+    def generate_workouts_from_request(
+        workouts_data: list[dict[str, int | float]],
+    ) -> list[Workout]:
+        exercises = ExerciseRepository.get_exercises_by_workouts(workouts_data)
+        return [
             Workout(
                 exercise=exercises[workout_data["exercise"]],
                 repetitions=workout_data["repetitions"],
@@ -72,14 +104,6 @@ class WorkoutPlanService:
             )
             for workout_data in workouts_data
         ]
-        Workout.objects.bulk_create(workouts)
-        workout_plan.workouts.add(*workouts)
-        workout_plan.save()
-
-        return {
-            "message": "Workout plan created successfully",
-            "status": status.HTTP_201_CREATED,
-        }
 
     @staticmethod
     def generate_plans_report(user: User | AbstractUser) -> dict[str, Any]:

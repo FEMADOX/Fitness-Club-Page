@@ -1,3 +1,5 @@
+from typing import Any
+
 from django.contrib.auth import get_user_model
 from rest_framework import status, viewsets
 from rest_framework.permissions import IsAuthenticated
@@ -59,4 +61,29 @@ class WorkoutPlanViewSet(viewsets.ModelViewSet):
             user,
         )
 
-        return Response(response["message"], status=response["status"])
+        serializer = self.get_serializer(response)
+
+        return Response(serializer.data, status.HTTP_201_CREATED)
+
+    def update(self, request: Request, **kwargs: dict[str, Any]) -> Response:
+        data = request.data
+
+        try:
+            pk = int(kwargs["pk"])  # type: ignore[]
+        except ValueError as error:
+            raise KwargIntException from error
+
+        # Serializer Validation
+        self.get_serializer(data=data).is_valid(raise_exception=True)
+
+        user = get_user_model().objects.get(pk=request.user.pk)
+
+        response = WorkoutPlanService.update(
+            data,
+            user,
+            pk,
+        )
+
+        serializer = self.get_serializer(response)
+
+        return Response(serializer.data, status.HTTP_201_CREATED)
