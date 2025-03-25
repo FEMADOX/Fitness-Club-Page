@@ -91,12 +91,43 @@ class WorkoutPlanService:
         )
 
     @staticmethod
+    def partial_update(
+        request: dict[str, Any],
+        user: User | AbstractUser,
+        pk: int,
+    ) -> WorkoutPlan:
+        WorkoutPlanRepository.workoutplan_exist(pk)
+        workout_plan = WorkoutPlanRepository.get_workoutplan(pk, user)
+
+        request_list = {
+            "workouts": request.get("workouts") or None,
+            "schedule_date": request.get("schedule_date") or None,
+            "status": request.get("status") or None,
+        }
+        fields_to_update = {key: value for key, value in request_list.items() if value}
+
+        if fields_to_update.get("workouts"):
+            fields_to_update["workouts"] = (
+                WorkoutPlanService.generate_workouts_from_request(
+                    fields_to_update["workouts"],
+                )
+            )
+
+        return WorkoutPlanRepository.partial_update(
+            workout_plan,
+            fields_to_update["workouts"],
+            fields_to_update["schedule_date"],
+            fields_to_update["status"],
+        )
+
+    @staticmethod
     def generate_workouts_from_request(
         workouts_data: list[dict[str, int | float]],
     ) -> list[Workout]:
         exercises = ExerciseRepository.get_exercises_by_workouts(workouts_data)
         return [
             Workout(
+                id=workout_data.get("id"),
                 exercise=exercises[workout_data["exercise"]],
                 repetitions=workout_data["repetitions"],
                 sets=workout_data["sets"],
