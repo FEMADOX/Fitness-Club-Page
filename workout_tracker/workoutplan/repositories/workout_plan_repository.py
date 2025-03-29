@@ -218,7 +218,9 @@ class WorkoutRepository:
 
 class ExerciseRepository:
     @staticmethod
-    def get_exercises_by_workouts(workouts: list) -> dict[Any, Exercise]:
+    def get_exercises_by_workouts(
+        workouts: list[dict[str, Any]],
+    ) -> dict[Any, Exercise]:
         exercises_pk = [workout_data["exercise"] for workout_data in workouts]
 
         ExerciseRepository.exercises_exist(exercises_pk)

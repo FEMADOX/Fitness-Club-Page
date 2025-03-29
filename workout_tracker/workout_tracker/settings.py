@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 from pathlib import Path
+from typing import Any
 
 from django.utils.timezone import timedelta
 
@@ -67,7 +68,7 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = "workout_tracker.urls"
 
-TEMPLATES = [
+TEMPLATES: list[dict[str, Any]] = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
         "DIRS": [],
@@ -89,7 +90,7 @@ WSGI_APPLICATION = "workout_tracker.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
-DATABASES = {
+DATABASES: dict[str, dict[str, Any]] = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
         "NAME": BASE_DIR / "db.sqlite3",
@@ -139,7 +140,7 @@ STATIC_URL = "static/"
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 
-SIMPLE_JWT = {
+SIMPLE_JWT: dict[str, Any] = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=5),
     "REFRESH_TOKEN_LIFETIME": timedelta(weeks=1),
     "ALGORITHM": "HS256",

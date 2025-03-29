@@ -1,4 +1,6 @@
 # noqa: INP001
+from _collections_abc import Callable
+from typing import Any
 from unittest.mock import MagicMock
 
 import pytest
@@ -6,24 +8,20 @@ from django.db.models.manager import BaseManager
 
 from common.exceptions import (
     ExerciseDoesntExistException,
-    KwargIntException,  # noqa: F401
+    KwargIntException,
     NoStatusPlansException,
     NoWorkoutsInPlanException,
     NoWorkoutsWithExerciseException,
     PlanDoesntExistException,
-    UserDoesnExistException,  # noqa: F401
-    UserIsntOwnerException,  # noqa: F401
 )
 from tests.workoutplan.repositories.test_workout_plan_repository import logger
 from workoutplan.models import Exercise, Workout, WorkoutPlan
 from workoutplan.repositories.workout_plan_repository import (
     ExerciseRepository,
-    UserRepository,  # noqa: F401
+    UserRepository,  # noqa: F401 # type: ignore
     WorkoutPlanRepository,
-    WorkoutRepository,  # noqa: F401
+    WorkoutRepository,
 )
-
-# Optimized exception tests
 
 
 @pytest.mark.django_db
@@ -32,69 +30,60 @@ from workoutplan.repositories.workout_plan_repository import (
     [
         # Exercise Doesnt Exist Test
         (
-            # Mock Method
-            lambda: MagicMock(side_effect=Exercise.DoesNotExist),
-            # Exception
-            ExerciseDoesntExistException,
-            # Repository Method
-            ExerciseRepository.exercise_exist,
-            # Args
-            {"pk": 1},
+            lambda: MagicMock(side_effect=Exercise.DoesNotExist),  # Mock Method
+            ExerciseDoesntExistException,  # Exception
+            ExerciseRepository.exercise_exist,  # Repository Method
+            {"pk": 1},  # Args
         ),
-        # No Status Plans Test
         (
-            # Mock Method
+            lambda: MagicMock(side_effect=KwargIntException),  # Mock Method
+            KwargIntException,  # Exception
+            int,  # Repository Method
+            {"pk": "invalid_pk"},  # Args
+        ),
+        (
             lambda: MagicMock(
                 return_value=MagicMock(exists=MagicMock(return_value=False)),
-            ),
-            # Exception
-            NoStatusPlansException,
-            # Repository Method
-            WorkoutPlanRepository.filter_by_status,
-            # Args
-            {"status": "ACTIVE", "user": MagicMock()},
+            ),  # Mock Method
+            NoStatusPlansException,  # Exception
+            WorkoutPlanRepository.filter_by_status,  # Repository Method
+            {"status": "ACTIVE", "user": MagicMock()},  # Args
         ),
-        # No Workouts in Plan Test
         (
-            # Mock Method
             lambda: MagicMock(
                 return_value=MagicMock(exists=MagicMock(return_value=False)),
-            ),
-            # Exception
-            NoWorkoutsInPlanException,
-            # Repository Method
-            WorkoutRepository.filter_by_plan,
-            # Args
-            {"workout_plan": MagicMock(spec=BaseManager[WorkoutPlan()])},
+            ),  # Mock Method
+            NoWorkoutsInPlanException,  # Exception
+            WorkoutRepository.filter_by_plan,  # Repository Method
+            {"workout_plan": MagicMock(spec=BaseManager[WorkoutPlan])},  # Args
         ),
-        # No Workouts with Exercise Test
         (
-            # Mock Method
-            lambda: MagicMock(side_effect=NoWorkoutsWithExerciseException),
-            # Exception
-            NoWorkoutsWithExerciseException,
-            # Repository Method
-            WorkoutRepository.filter_by_exercise,
-            # Args
-            {"pk": 1},
+            lambda: MagicMock(
+                side_effect=NoWorkoutsWithExerciseException,
+            ),  # Mock Method
+            NoWorkoutsWithExerciseException,  # Exception
+            WorkoutRepository.filter_by_exercise,  # Repository Method
+            {"pk": 1},  # Args
         ),
-        # Plan Doesnt Exist Test
         (
-            # Mock Method
-            lambda: MagicMock(side_effect=PlanDoesntExistException),
-            # Exception
-            PlanDoesntExistException,
-            # Repository Method
-            WorkoutPlanRepository.get_workoutplan,
-            # Args
-            {"pk": 1, "user": MagicMock()},
+            lambda: MagicMock(side_effect=PlanDoesntExistException),  # Mock Method
+            PlanDoesntExistException,  # Exception
+            WorkoutPlanRepository.get_workoutplan,  # Repository Method
+            {"pk": 1, "user": MagicMock()},  # Args
         ),
     ],
 )
-def test_exceptions(mock_method, exception, repository_method, args) -> None:  # noqa: ANN001
+def test_exceptions(
+    mock_method: Callable[[], MagicMock],
+    exception: type[Exception],
+    repository_method: Callable[..., Any],
+    args: dict[str, Any],
+) -> None:
     # Mock the required method
     if "Exercise" in repository_method.__qualname__:
         Exercise.objects.get = mock_method()
+    if exception == KwargIntException:
+        repository_method = mock_method()
     elif "WorkoutPlan" in repository_method.__qualname__:
         if repository_method.__name__ == "filter_by_status":
             WorkoutPlan.objects.filter = mock_method()
