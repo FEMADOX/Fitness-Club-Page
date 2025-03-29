@@ -121,7 +121,9 @@ class ExerciseRepository:
     @staticmethod
     def get_exercises_by_workouts(workouts: list) -> dict[Any, Exercise]:
         exercises_pk = [workout_data["exercise"] for workout_data in workouts]
-        [ExerciseRepository.exercise_exist(pk) for pk in exercises_pk]
+
+        ExerciseRepository.exercises_exist(exercises_pk)
+
         return Exercise.objects.in_bulk(exercises_pk)
 
     @staticmethod
@@ -130,6 +132,15 @@ class ExerciseRepository:
             Exercise.objects.get(pk=pk)
         except Exercise.DoesNotExist as error:
             raise ExerciseDoesntExistException from error
+
+    @staticmethod
+    def exercises_exist(exercises_pk: list[int]) -> None:
+        exercises = Exercise.objects.filter(pk__in=exercises_pk)
+        missing_exercises = set(exercises_pk) - set(
+            exercises.values_list("pk", flat=True),
+        )
+        if missing_exercises:
+            raise ExerciseDoesntExistException
 
 
 class UserRepository:
