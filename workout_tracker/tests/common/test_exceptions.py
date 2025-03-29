@@ -105,8 +105,7 @@ def test_exceptions(mock_method, exception, repository_method, args) -> None:  #
             Workout.objects.filter = mock_method()
         elif repository_method.__name__ == "filter_by_exercise":
             Exercise.objects.get = MagicMock(return_value=MagicMock(spec=Exercise))
-            # Exercise.objects.get = mock_method()
-            Workout.objects.filter = MagicMock
+            Workout.objects.filter = mock_method()
 
     # Assert the exception is raised
     with pytest.raises(exception):
