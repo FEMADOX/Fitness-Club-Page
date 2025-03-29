@@ -9,7 +9,8 @@ from common.exceptions import (
     ExerciseDoesntExistException,
     NoStatusPlansException,
     NoWorkoutsInPlanException,
-    PlanDoesnExistException,
+    NoWorkoutsWithExerciseException,
+    PlanDoesntExistException,
     UserDoesnExistException,
     UserIsntOwnerException,
 )
@@ -20,33 +21,37 @@ class WorkoutPlanRepository:
     @staticmethod
     def create(**kwargs: Any) -> WorkoutPlan:  # noqa: ANN401
         kwargs_dic: dict[str, Any] = next(iter(kwargs.values()))
-        user, workouts, date, status = kwargs_dic.values()
+        user, workouts, schedule_date, status = kwargs_dic.values()
         UserRepository.user_exist(user.pk)
         workout_plan = WorkoutPlan.objects.create(
             user=user,
-            schedule_date=date or timezone.now(),
+            schedule_date=schedule_date or timezone.now(),
             status=status or "ACTIVE",
         )
         Workout.objects.bulk_create(workouts)
-        workout_plan.workouts.add(*workouts)
+
+        workout_plan.workouts.add(*workouts) if isinstance(
+            workouts,
+            list,
+        ) else workout_plan.workouts.add(workouts)
 
         return workout_plan
 
     @staticmethod
     def update(
         workout_plan: WorkoutPlan,
-        **kwargs: dict[str, Any],
-    ) -> WorkoutPlan:  # noqa: ANN401
-        kwargs_dic = next(iter(kwargs.values()))
-        workouts, schedule_date, status = kwargs_dic.values()
+        workouts: list[Workout] | None = None,
+        schedule_date: datetime.datetime | None = None,
+        status: str | None = None,
+    ) -> WorkoutPlan:
+        if workouts:
+            existing_workouts = WorkoutPlanRepository.update_workouts(workouts)
 
-        existing_workouts = WorkoutPlanRepository.update_workouts(workouts)
+            if not existing_workouts:
+                Workout.objects.bulk_create(workouts)
 
-        if not existing_workouts:
-            Workout.objects.bulk_create(workouts)
-
-        workout_plan.workouts.clear()
-        workout_plan.workouts.add(*workouts)
+            workout_plan.workouts.clear()
+            workout_plan.workouts.add(*workouts)
         workout_plan.schedule_date = schedule_date or timezone.now()
         workout_plan.status = status or "ACTIVE"
         workout_plan.save()
@@ -162,7 +167,7 @@ class WorkoutPlanRepository:
         try:
             WorkoutPlan.objects.get(pk=workoutplan_pk)
         except WorkoutPlan.DoesNotExist as error:
-            raise PlanDoesnExistException from error
+            raise PlanDoesntExistException from error
 
     @staticmethod
     def is_user_owner(user: User | AbstractUser, workout_plan_pk: int) -> None:
@@ -196,14 +201,28 @@ class WorkoutRepository:
         pk: int,
     ) -> BaseManager[Workout]:
         ExerciseRepository.exercise_exist(pk)
+        if not Workout.objects.filter(exercise=pk).exists():
+            raise NoWorkoutsWithExerciseException
         return Workout.objects.filter(exercise=pk)
+
+    @staticmethod
+    def workouts_by_exercise(
+        pk: int,
+        workouts: BaseManager[Workout],
+    ) -> BaseManager[Workout]:
+        ExerciseRepository.exercise_exist(pk)
+        if not workouts.filter(exercise=pk).exists():
+            raise NoWorkoutsWithExerciseException
+        return workouts.filter(exercise=pk)
 
 
 class ExerciseRepository:
     @staticmethod
     def get_exercises_by_workouts(workouts: list) -> dict[Any, Exercise]:
         exercises_pk = [workout_data["exercise"] for workout_data in workouts]
-        [ExerciseRepository.exercise_exist(pk) for pk in exercises_pk]
+
+        ExerciseRepository.exercises_exist(exercises_pk)
+
         return Exercise.objects.in_bulk(exercises_pk)
 
     @staticmethod
@@ -212,6 +231,15 @@ class ExerciseRepository:
             Exercise.objects.get(pk=pk)
         except Exercise.DoesNotExist as error:
             raise ExerciseDoesntExistException from error
+
+    @staticmethod
+    def exercises_exist(exercises_pk: list[int]) -> None:
+        exercises = Exercise.objects.filter(pk__in=exercises_pk)
+        missing_exercises = set(exercises_pk) - set(
+            exercises.values_list("pk", flat=True),
+        )
+        if missing_exercises:
+            raise ExerciseDoesntExistException
 
 
 class UserRepository:

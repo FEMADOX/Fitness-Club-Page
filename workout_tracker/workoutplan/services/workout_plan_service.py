@@ -4,9 +4,6 @@ from django.contrib.auth.models import AbstractUser, User
 from django.db.models import Count, F, Max, QuerySet, Sum
 from django.db.models.manager import BaseManager
 
-from common.exceptions import (
-    NoWorkoutsWithExerciseException,
-)
 from workoutplan.models import Workout, WorkoutPlan
 from workoutplan.repositories.workout_plan_repository import (
     ExerciseRepository,
@@ -83,11 +80,9 @@ class WorkoutPlanService:
 
         return WorkoutPlanRepository.update(
             workout_plan,
-            kwargs={
-                "workouts": workouts,
-                "updated_date": workout_plan_date,
-                "updated_status": workout_plan_status,
-            },
+            workouts,
+            workout_plan_date,
+            workout_plan_status,
         )
 
     @staticmethod
@@ -166,11 +161,7 @@ class WorkoutPlanService:
         pk: int,
     ) -> dict[str, Any]:
         workouts = WorkoutRepository.get_workouts_ended(user)
-
-        if not workouts.filter(exercise=pk).exists():
-            raise NoWorkoutsWithExerciseException
-
-        workouts = workouts.filter(exercise=pk)
+        workouts = WorkoutRepository.workouts_by_exercise(pk, workouts)
         progress = workouts.aggregate(
             max_volume=Max(F("weight") * F("repetitions") * F("sets")),
             max_weight=Max("weight"),
