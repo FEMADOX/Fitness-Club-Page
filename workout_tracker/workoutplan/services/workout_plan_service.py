@@ -1,13 +1,18 @@
 from typing import Any
 
-from django.contrib.auth.models import AbstractBaseUser, User
-from django.db.models import Count, QuerySet, Sum
+from django.contrib.auth.models import AbstractUser, User
+from django.db.models import Count, F, Max, QuerySet, Sum
 from django.db.models.manager import BaseManager
-from django.utils import timezone
-from rest_framework import status
 
-from workoutplan.models import Exercise, Workout, WorkoutPlan
-from workoutplan.repositories.workout_plan_repository import WorkoutPlanRepository
+from common.exceptions import (
+    NoWorkoutsWithExerciseException,
+)
+from workoutplan.models import Workout, WorkoutPlan
+from workoutplan.repositories.workout_plan_repository import (
+    ExerciseRepository,
+    WorkoutPlanRepository,
+    WorkoutRepository,
+)
 
 
 class WorkoutPlanService:
@@ -17,72 +22,80 @@ class WorkoutPlanService:
 
     @staticmethod
     def get_all_workout_plans_of_user(
-        user: User | AbstractBaseUser,
+        user: User | AbstractUser,
     ) -> BaseManager[WorkoutPlan]:
         return WorkoutPlanRepository.get_all(user)
 
     @staticmethod
     def get_workout_plan_of_user(
-        user: User | AbstractBaseUser,
+        user: User | AbstractUser,
         workoutplan_pk: int,
     ) -> WorkoutPlan:
         return WorkoutPlanRepository.get_workoutplan(workoutplan_pk, user)
 
     @staticmethod
-    def get_all_workout_plans_filtered(
+    def workout_plans_by_status(
         status_filter: str | None,
-        user: User | AbstractBaseUser,
+        user: User | AbstractUser,
     ) -> BaseManager[WorkoutPlan]:
-        if status_filter and status_filter.upper() in {"PENDING", "ACTIVE"}:
+        if status_filter and status_filter.upper() in {"PENDING", "ACTIVE", "ENDED"}:
             return WorkoutPlanRepository.filter_by_status(status_filter.upper(), user)
 
         return WorkoutPlanRepository.get_all(user)
 
     @staticmethod
-    def user_owner_workoutplan_validation(
-        user: User | AbstractBaseUser,
-        workoutplan_pk: int,
-    ) -> dict[str, Any] | dict[str, bool]:
-        if not WorkoutPlanRepository.workoutplan_exist(workoutplan_pk):
-            return {
-                "success": False,
-                "message": "Workout Plan doesn't exist",
-                "status": status.HTTP_404_NOT_FOUND,
-            }
-        if not WorkoutPlanRepository.is_user_owner(user, workoutplan_pk):
-            return {
-                "success": False,
-                "message": "User is not owner of this Workout Plan",
-                "status": status.HTTP_403_FORBIDDEN,
-            }
-
-        return {"success": True}
-
-    # @staticmethod
-    # def get_all_user_workout_plans(user_id: int) -> QuerySet[WorkoutPlan]:
-    #     user = get_user_model().objects.get(pk=user_id)
-
-    #     return WorkoutPlanRepository.get_by_user(user)
-
-    @staticmethod
-    def create_workout_plan(
-        request: dict,
-        user: User | AbstractBaseUser,
-    ) -> dict[str, Any]:
-        workouts_data = request["workouts"]
-        workout_plan_date = request.get("schedule_date")
+    def create(
+        request: dict[str, Any],
+        user: User | AbstractUser,
+    ) -> WorkoutPlan:
         workout_plan_user = user
+        workout_plan_date = request.get("schedule_date")
+        workout_plan_status = request.get("status")
 
-        exercises_id = [workout_data["exercise"] for workout_data in workouts_data]
-        exercises = Exercise.objects.in_bulk(exercises_id)
+        workouts_data = request["workouts"]
 
-        workout_plan = WorkoutPlan.objects.create(
-            user=workout_plan_user,
-            schedule_date=workout_plan_date or timezone.now(),
-            status="PENDING" if workout_plan_date else "ACTIVE",
+        workouts = WorkoutPlanService.generate_workouts_from_request(workouts_data)
+
+        return WorkoutPlanRepository.create(
+            kwargs={
+                "user": workout_plan_user,
+                "workouts": workouts,
+                "updated_date": workout_plan_date,
+                "updated_status": workout_plan_status,
+            },
         )
 
-        workouts = [
+    @staticmethod
+    def update(
+        request: dict[str, Any],
+        user: User | AbstractUser,
+        pk: int,
+    ) -> WorkoutPlan:
+        WorkoutPlanRepository.workoutplan_exist(pk)
+        workout_plan = WorkoutPlanRepository.get_workoutplan(pk, user)
+
+        workout_plan_date = request.get("schedule_date")
+        workout_plan_status = request.get("status")
+
+        workouts_data = request["workouts"]
+
+        workouts = WorkoutPlanService.generate_workouts_from_request(workouts_data)
+
+        return WorkoutPlanRepository.update(
+            workout_plan,
+            kwargs={
+                "workouts": workouts,
+                "updated_date": workout_plan_date,
+                "updated_status": workout_plan_status,
+            },
+        )
+
+    @staticmethod
+    def generate_workouts_from_request(
+        workouts_data: list[dict[str, int | float]],
+    ) -> list[Workout]:
+        exercises = ExerciseRepository.get_exercises_by_workouts(workouts_data)
+        return [
             Workout(
                 exercise=exercises[workout_data["exercise"]],
                 repetitions=workout_data["repetitions"],
@@ -91,19 +104,12 @@ class WorkoutPlanService:
             )
             for workout_data in workouts_data
         ]
-        Workout.objects.bulk_create(workouts)
-        workout_plan.workouts.add(*workouts)
-        workout_plan.save()
-
-        return {
-            "message": "Workout plan created successfully",
-            "status": status.HTTP_201_CREATED,
-        }
 
     @staticmethod
-    def generate_report(user: User) -> dict[str, Any]:
-        workout_plans = WorkoutPlanRepository.get_all(user)
-        total_workouts = workout_plans.aggregate(total=Count("workouts"))["total"]
+    def generate_plans_report(user: User | AbstractUser) -> dict[str, Any]:
+        workout_plans = WorkoutPlanRepository.filter_by_status("ENDED", user)
+        total_plans = workout_plans.count()
+        total_exercises = workout_plans.aggregate(total=Count("workouts"))["total"]
         total_reps = Workout.objects.filter(workout_plans__in=workout_plans).aggregate(
             total=Sum("repetitions"),
         )["total"]
@@ -116,8 +122,34 @@ class WorkoutPlanService:
             total=Sum("weight"),
         )["total"]
         return {
-            "total_workouts": total_workouts,
-            "total_reps": total_reps,
+            "total_plans": total_plans,
+            "total_exercises": total_exercises,
             "total_sets": total_sets,
+            "total_reps": total_reps,
             "total_weight": total_weight,
+        }
+
+    @staticmethod
+    def get_exercise_progress(
+        user: User | AbstractUser,
+        pk: int,
+    ) -> dict[str, Any]:
+        workouts = WorkoutRepository.get_workouts_ended(user)
+
+        if not workouts.filter(exercise=pk).exists():
+            raise NoWorkoutsWithExerciseException
+
+        workouts = workouts.filter(exercise=pk)
+        progress = workouts.aggregate(
+            max_volume=Max(F("weight") * F("repetitions") * F("sets")),
+            max_weight=Max("weight"),
+            max_repetitions=Max("repetitions"),
+            max_sets=Max("sets"),
+        )
+
+        return {
+            "max_volume": progress["max_volume"] or 0,
+            "max_weight": progress["max_weight"] or 0,
+            "max_repetitions": progress["max_repetitions"] or 0,
+            "max_sets": progress["max_sets"] or 0,
         }

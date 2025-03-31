@@ -71,10 +71,12 @@ class WorkoutPlan(models.Model):
     STATUS = [
         ("ACTIVE", "Active"),
         ("PENDING", "Pending"),
+        ("ENDED", "Ended"),
     ]
 
     user = models.ForeignKey(
-        User, on_delete=models.CASCADE,
+        User,
+        on_delete=models.CASCADE,
     )
     workouts = models.ManyToManyField(Workout, related_name="workout_plans")
     description = models.TextField(blank=True, default="No description")
