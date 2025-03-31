@@ -19,9 +19,14 @@ from workoutplan.models import Exercise, Workout, WorkoutPlan
 
 class WorkoutPlanRepository:
     @staticmethod
-    def create(**kwargs: Any) -> WorkoutPlan:  # noqa: ANN401
-        kwargs_dic: dict[str, Any] = next(iter(kwargs.values()))
-        user, workouts, schedule_date, status = kwargs_dic.values()
+    def create(
+        user: User | AbstractUser,
+        workouts: list[Workout],
+        schedule_date: datetime.datetime | None = None,
+        status: str | None = None,
+    ) -> WorkoutPlan:  # noqa: ANN401
+        # kwargs_dic: dict[str, Any] = next(iter(kwargs.values()))
+        # user, workouts, schedule_date, status = kwargs_dic.values()
         UserRepository.user_exist(user.pk)
         workout_plan = WorkoutPlan.objects.create(
             user=user,
@@ -30,10 +35,7 @@ class WorkoutPlanRepository:
         )
         Workout.objects.bulk_create(workouts)
 
-        workout_plan.workouts.add(*workouts) if isinstance(
-            workouts,
-            list,
-        ) else workout_plan.workouts.add(workouts)
+        workout_plan.workouts.add(*workouts)
 
         return workout_plan
 
@@ -109,7 +111,7 @@ class WorkoutPlanRepository:
         existing_workouts = [
             Workout.objects.get(pk=workout_data.pk)
             for workout_data in updated_workouts
-            if hasattr(workout_data, "id")  # Existing workouts have an ID
+            if workout_data.pk  # Existing workouts have an ID
         ]
 
         if existing_workouts:
