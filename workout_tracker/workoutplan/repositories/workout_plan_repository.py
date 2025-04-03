@@ -24,9 +24,7 @@ class WorkoutPlanRepository:
         workouts: list[Workout],
         schedule_date: datetime.datetime | None = None,
         status: str | None = None,
-    ) -> WorkoutPlan:  # noqa: ANN401
-        # kwargs_dic: dict[str, Any] = next(iter(kwargs.values()))
-        # user, workouts, schedule_date, status = kwargs_dic.values()
+    ) -> WorkoutPlan:
         UserRepository.user_exist(user.pk)
         workout_plan = WorkoutPlan.objects.create(
             user=user,
