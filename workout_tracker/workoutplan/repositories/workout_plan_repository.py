@@ -1,8 +1,8 @@
 import datetime
 from typing import Any
 
-from django.contrib.auth.models import AbstractUser, User
-from django.db.models.manager import BaseManager
+from django.contrib.auth.models import AbstractBaseUser, AbstractUser, User
+from django.db.models import QuerySet
 from django.utils import timezone
 
 from common.exceptions import (
@@ -20,7 +20,7 @@ from workoutplan.models import Exercise, Workout, WorkoutPlan
 class WorkoutPlanRepository:
     @staticmethod
     def create(
-        user: User | AbstractUser,
+        user: User | AbstractUser | AbstractBaseUser,
         workouts: list[Workout],
         schedule_date: datetime.datetime | None = None,
         status: str | None = None,
@@ -105,12 +105,12 @@ class WorkoutPlanRepository:
         Args:
             updated_workouts (list[Workout]): List of updated Workout objects.
         """
+        workouts_pk = [workout.pk for workout in updated_workouts if workout.pk]
 
-        existing_workouts = [
-            Workout.objects.get(pk=workout_data.pk)
-            for workout_data in updated_workouts
-            if workout_data.pk  # Existing workouts have an ID
-        ]
+        if not workouts_pk:
+            return []
+
+        existing_workouts = list(Workout.objects.filter(pk__in=workouts_pk))
 
         if existing_workouts:
             # Update individual workout attributes
@@ -135,8 +135,8 @@ class WorkoutPlanRepository:
     # Searching
     @staticmethod
     def get_all(
-        user: User | AbstractUser | None = None,
-    ) -> BaseManager[WorkoutPlan]:
+        user: User | AbstractUser | AbstractBaseUser | None = None,
+    ) -> QuerySet[WorkoutPlan, WorkoutPlan]:
         if user:
             UserRepository.user_exist(user.pk)
             return WorkoutPlan.objects.filter(user=user)
@@ -145,7 +145,7 @@ class WorkoutPlanRepository:
     @staticmethod
     def get_workoutplan(
         pk: int,
-        user: User | AbstractUser,
+        user: User | AbstractUser | AbstractBaseUser,
     ) -> WorkoutPlan:
         WorkoutPlanRepository.workoutplan_exist(pk)
         WorkoutPlanRepository.is_user_owner(user, pk)
@@ -154,8 +154,8 @@ class WorkoutPlanRepository:
     @staticmethod
     def filter_by_status(
         status: str,
-        user: User | AbstractUser,
-    ) -> BaseManager[WorkoutPlan]:
+        user: User | AbstractUser | AbstractBaseUser,
+    ) -> QuerySet[WorkoutPlan]:
         if not WorkoutPlan.objects.filter(user=user, status=status).exists():
             raise NoStatusPlansException
 
@@ -170,7 +170,10 @@ class WorkoutPlanRepository:
             raise PlanDoesntExistException from error
 
     @staticmethod
-    def is_user_owner(user: User | AbstractUser, workout_plan_pk: int) -> None:
+    def is_user_owner(
+        user: User | AbstractUser | AbstractBaseUser,
+        workout_plan_pk: int,
+    ) -> None:
         WorkoutPlanRepository.workoutplan_exist(workout_plan_pk)
         try:
             WorkoutPlan.objects.get(pk=workout_plan_pk, user=user)
@@ -181,8 +184,8 @@ class WorkoutPlanRepository:
 class WorkoutRepository:
     @staticmethod
     def get_workouts_ended(
-        user: User | AbstractUser,
-    ) -> BaseManager[Workout]:
+        user: User | AbstractUser | AbstractBaseUser,
+    ) -> QuerySet[Workout, Workout]:
         workout_plans = WorkoutPlanRepository.filter_by_status(
             status="ENDED",
             user=user,
@@ -190,7 +193,9 @@ class WorkoutRepository:
         return WorkoutRepository.filter_by_plan(workout_plans)
 
     @staticmethod
-    def filter_by_plan(workout_plan: BaseManager[WorkoutPlan]) -> BaseManager[Workout]:
+    def filter_by_plan(
+        workout_plan: QuerySet[WorkoutPlan],
+    ) -> QuerySet[Workout, Workout]:
         workouts = Workout.objects.filter(workout_plans__in=workout_plan)
         if not workouts.exists():
             raise NoWorkoutsInPlanException
@@ -199,7 +204,7 @@ class WorkoutRepository:
     @staticmethod
     def filter_by_exercise(
         pk: int,
-    ) -> BaseManager[Workout]:
+    ) -> QuerySet[Workout, Workout]:
         ExerciseRepository.exercise_exist(pk)
         if not Workout.objects.filter(exercise=pk).exists():
             raise NoWorkoutsWithExerciseException
@@ -208,8 +213,8 @@ class WorkoutRepository:
     @staticmethod
     def workouts_by_exercise(
         pk: int,
-        workouts: BaseManager[Workout],
-    ) -> BaseManager[Workout]:
+        workouts: QuerySet[Workout],
+    ) -> QuerySet[Workout, Workout]:
         ExerciseRepository.exercise_exist(pk)
         if not workouts.filter(exercise=pk).exists():
             raise NoWorkoutsWithExerciseException

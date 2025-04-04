@@ -1,8 +1,7 @@
 from typing import Any
 
-from django.contrib.auth.models import AbstractUser, User
+from django.contrib.auth.models import AbstractBaseUser, AbstractUser, User
 from django.db.models import Count, F, Max, QuerySet, Sum
-from django.db.models.manager import BaseManager
 
 from workoutplan.models import Workout, WorkoutPlan
 from workoutplan.repositories.workout_plan_repository import (
@@ -19,13 +18,13 @@ class WorkoutPlanService:
 
     @staticmethod
     def get_all_workout_plans_of_user(
-        user: User | AbstractUser,
-    ) -> BaseManager[WorkoutPlan]:
+        user: User | AbstractUser | AbstractBaseUser,
+    ) -> QuerySet[WorkoutPlan, WorkoutPlan]:
         return WorkoutPlanRepository.get_all(user)
 
     @staticmethod
     def get_workout_plan_of_user(
-        user: User | AbstractUser,
+        user: User | AbstractUser | AbstractBaseUser,
         workoutplan_pk: int,
     ) -> WorkoutPlan:
         return WorkoutPlanRepository.get_workoutplan(workoutplan_pk, user)
@@ -33,8 +32,8 @@ class WorkoutPlanService:
     @staticmethod
     def workout_plans_by_status(
         status_filter: str | None,
-        user: User | AbstractUser,
-    ) -> BaseManager[WorkoutPlan]:
+        user: User | AbstractUser | AbstractBaseUser,
+    ) -> QuerySet[WorkoutPlan, WorkoutPlan]:
         if status_filter and status_filter.upper() in {"PENDING", "ACTIVE", "ENDED"}:
             return WorkoutPlanRepository.filter_by_status(status_filter.upper(), user)
 
@@ -43,52 +42,49 @@ class WorkoutPlanService:
     @staticmethod
     def create(
         request: dict[str, Any],
-        user: User | AbstractUser,
+        user: User | AbstractUser | AbstractBaseUser,
     ) -> WorkoutPlan:
-        workout_plan_user = user
-        workout_plan_date = request.get("schedule_date")
-        workout_plan_status = request.get("status")
+        schedule_date = request.get("schedule_date")
+        status = request.get("status")
 
         workouts_data = request["workouts"]
 
         workouts = WorkoutPlanService.generate_workouts_from_request(workouts_data)
 
         return WorkoutPlanRepository.create(
-            kwargs={
-                "user": workout_plan_user,
-                "workouts": workouts,
-                "updated_date": workout_plan_date,
-                "updated_status": workout_plan_status,
-            },
+            user=user,
+            workouts=workouts,
+            schedule_date=schedule_date or None,
+            status=status or None,
         )
 
     @staticmethod
     def update(
         request: dict[str, Any],
-        user: User | AbstractUser,
+        user: User | AbstractUser | AbstractBaseUser,
         pk: int,
     ) -> WorkoutPlan:
         WorkoutPlanRepository.workoutplan_exist(pk)
         workout_plan = WorkoutPlanRepository.get_workoutplan(pk, user)
 
-        workout_plan_date = request.get("schedule_date")
-        workout_plan_status = request.get("status")
+        schedule_date = request.get("schedule_date")
+        status = request.get("status")
 
         workouts_data = request["workouts"]
 
         workouts = WorkoutPlanService.generate_workouts_from_request(workouts_data)
 
         return WorkoutPlanRepository.update(
-            workout_plan,
-            workouts,
-            workout_plan_date,
-            workout_plan_status,
+            workout_plan=workout_plan,
+            workouts=workouts or None,
+            schedule_date=schedule_date or None,
+            status=status or None,
         )
 
     @staticmethod
     def partial_update(
         request: dict[str, Any],
-        user: User | AbstractUser,
+        user: User | AbstractUser | AbstractBaseUser,
         pk: int,
     ) -> WorkoutPlan:
         WorkoutPlanRepository.workoutplan_exist(pk)
@@ -109,10 +105,10 @@ class WorkoutPlanService:
             )
 
         return WorkoutPlanRepository.partial_update(
-            workout_plan,
-            fields_to_update["workouts"],
-            fields_to_update["schedule_date"],
-            fields_to_update["status"],
+            workout_plan=workout_plan,
+            workouts=fields_to_update["workouts"] or None,
+            schedule_date=fields_to_update["schedule_date"] or None,
+            status=fields_to_update["status"] or None,
         )
 
     @staticmethod
@@ -120,6 +116,7 @@ class WorkoutPlanService:
         workouts_data: list[dict[str, int | float]],
     ) -> list[Workout]:
         exercises = ExerciseRepository.get_exercises_by_workouts(workouts_data)
+
         return [
             Workout(
                 id=workout_data.get("id"),
@@ -132,7 +129,9 @@ class WorkoutPlanService:
         ]
 
     @staticmethod
-    def generate_plans_report(user: User | AbstractUser) -> dict[str, Any]:
+    def generate_plans_report(
+        user: User | AbstractUser | AbstractBaseUser,
+    ) -> dict[str, Any]:
         workout_plans = WorkoutPlanRepository.filter_by_status("ENDED", user)
         total_plans = workout_plans.count()
         total_exercises = workout_plans.aggregate(total=Count("workouts"))["total"]
@@ -147,6 +146,7 @@ class WorkoutPlanService:
         ).aggregate(
             total=Sum("weight"),
         )["total"]
+
         return {
             "total_plans": total_plans,
             "total_exercises": total_exercises,
@@ -157,7 +157,7 @@ class WorkoutPlanService:
 
     @staticmethod
     def get_exercise_progress(
-        user: User | AbstractUser,
+        user: User | AbstractUser | AbstractBaseUser,
         pk: int,
     ) -> dict[str, Any]:
         workouts = WorkoutRepository.get_workouts_ended(user)
