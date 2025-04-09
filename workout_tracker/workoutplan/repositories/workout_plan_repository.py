@@ -11,7 +11,7 @@ from common.exceptions import (
     NoWorkoutsInPlanException,
     NoWorkoutsWithExerciseException,
     PlanDoesntExistException,
-    UserDoesnExistException,
+    UserDoesntExistException,
     UserIsntOwnerException,
 )
 from workoutplan.models import Exercise, Workout, WorkoutPlan
@@ -136,7 +136,7 @@ class WorkoutPlanRepository:
     @staticmethod
     def get_all(
         user: User | AbstractUser | AbstractBaseUser | None = None,
-    ) -> QuerySet[WorkoutPlan, WorkoutPlan]:
+    ) -> QuerySet[WorkoutPlan]:
         if user:
             UserRepository.user_exist(user.pk)
             return WorkoutPlan.objects.filter(user=user)
@@ -185,7 +185,7 @@ class WorkoutRepository:
     @staticmethod
     def get_workouts_ended(
         user: User | AbstractUser | AbstractBaseUser,
-    ) -> QuerySet[Workout, Workout]:
+    ) -> QuerySet[Workout]:
         workout_plans = WorkoutPlanRepository.filter_by_status(
             status="ENDED",
             user=user,
@@ -195,7 +195,7 @@ class WorkoutRepository:
     @staticmethod
     def filter_by_plan(
         workout_plan: QuerySet[WorkoutPlan],
-    ) -> QuerySet[Workout, Workout]:
+    ) -> QuerySet[Workout]:
         workouts = Workout.objects.filter(workout_plans__in=workout_plan)
         if not workouts.exists():
             raise NoWorkoutsInPlanException
@@ -204,7 +204,7 @@ class WorkoutRepository:
     @staticmethod
     def filter_by_exercise(
         pk: int,
-    ) -> QuerySet[Workout, Workout]:
+    ) -> QuerySet[Workout]:
         ExerciseRepository.exercise_exist(pk)
         if not Workout.objects.filter(exercise=pk).exists():
             raise NoWorkoutsWithExerciseException
@@ -214,7 +214,7 @@ class WorkoutRepository:
     def workouts_by_exercise(
         pk: int,
         workouts: QuerySet[Workout],
-    ) -> QuerySet[Workout, Workout]:
+    ) -> QuerySet[Workout]:
         ExerciseRepository.exercise_exist(pk)
         if not workouts.filter(exercise=pk).exists():
             raise NoWorkoutsWithExerciseException
@@ -255,4 +255,4 @@ class UserRepository:
         try:
             User.objects.get(pk=pk)
         except User.DoesNotExist as error:
-            raise UserDoesnExistException from error
+            raise UserDoesntExistException from error

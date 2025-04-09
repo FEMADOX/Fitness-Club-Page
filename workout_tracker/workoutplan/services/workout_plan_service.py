@@ -19,7 +19,7 @@ class WorkoutPlanService:
     @staticmethod
     def get_all_workout_plans_of_user(
         user: User | AbstractUser | AbstractBaseUser,
-    ) -> QuerySet[WorkoutPlan, WorkoutPlan]:
+    ) -> QuerySet[WorkoutPlan]:
         return WorkoutPlanRepository.get_all(user)
 
     @staticmethod
@@ -33,7 +33,7 @@ class WorkoutPlanService:
     def workout_plans_by_status(
         status_filter: str | None,
         user: User | AbstractUser | AbstractBaseUser,
-    ) -> QuerySet[WorkoutPlan, WorkoutPlan]:
+    ) -> QuerySet[WorkoutPlan]:
         if status_filter and status_filter.upper() in {"PENDING", "ACTIVE", "ENDED"}:
             return WorkoutPlanRepository.filter_by_status(status_filter.upper(), user)
 

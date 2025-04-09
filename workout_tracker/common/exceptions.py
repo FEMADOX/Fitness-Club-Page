@@ -42,7 +42,7 @@ class ExerciseDoesntExistException(APIException):
 
 
 # User
-class UserDoesnExistException(APIException):
+class UserDoesntExistException(APIException):
     status_code = status.HTTP_404_NOT_FOUND
     default_detail = "This User doesn't exist"
     default_code = "invalid_user"

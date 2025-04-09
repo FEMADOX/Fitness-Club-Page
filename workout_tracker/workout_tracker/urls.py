@@ -28,14 +28,14 @@ urlpatterns = [
     path("workoutplan/", include("workoutplan.urls")),
     path("api_auth/", include("workout_auth.urls")),
     # Spectacular Doc
-    path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
+    path("api-schema/", SpectacularAPIView.as_view(), name="schema"),
     path(
-        "api/schema/swagger-ui/",
+        "api-schema/swagger/",
         SpectacularSwaggerView.as_view(url_name="schema"),
-        name="swagger-ui",
+        name="swagger",
     ),
     path(
-        "api/schema/redoc/",
+        "api-schema/redoc/",
         SpectacularRedocView.as_view(url_name="schema"),
         name="redoc",
     ),
