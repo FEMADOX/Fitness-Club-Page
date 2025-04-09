@@ -32,7 +32,6 @@ DEBUG = config("DEBUG", default=False, cast=bool)
 
 ALLOWED_HOSTS = config("ALLOWED_HOSTS", cast=list)
 
-
 # Application definition
 
 INSTALLED_APPS = [
@@ -71,6 +70,14 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = "workout_tracker.urls"
+
+# Deploy Security Settings
+SECURE_HSTS_SECONDS = config("SECURE_HSTS_SECONDS", cast=int)
+SECURE_HSTS_INCLUDE_SUBDOMAINS = config("SECURE_HSTS_INCLUDE_SUBDOMAINS", cast=bool)
+SECURE_HSTS_PRELOAD = config("SECURE_HSTS_PRELOAD", cast=bool)
+SECURE_SSL_REDIRECT = config("SECURE_SSL_REDIRECT", cast=bool)
+CSRF_COOKIE_SECURE = config("CSRF_COOKIE_SECURE", cast=bool)
+SESSION_COOKIE_SECURE = config("SESSION_COOKIE_SECURE", cast=bool)
 
 TEMPLATES: list[dict[str, Any]] = [
     {
@@ -146,7 +153,7 @@ USE_TZ = True
 
 STATIC_URL = "static/"
 
-STATIC_ROOT = os.path.join(BASE_DIR, "static")
+STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
 
 # Media files
 # ______________________________________________________________________
