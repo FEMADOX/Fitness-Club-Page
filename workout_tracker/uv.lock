@@ -820,7 +820,9 @@ dependencies = [
     { name = "djangorestframework" },
     { name = "djangorestframework-simplejwt" },
     { name = "drf-spectacular" },
+    { name = "gunicorn" },
     { name = "psycopg2-binary" },
+    { name = "python-decouple" },
     { name = "setuptools" },
     { name = "wheel" },
 ]
@@ -835,10 +837,8 @@ types-stubs = [
 
 [package.dev-dependencies]
 dev = [
-    { name = "gunicorn" },
     { name = "ipython" },
     { name = "pytest-django" },
-    { name = "python-decouple" },
     { name = "ruff" },
 ]
 
@@ -852,7 +852,9 @@ requires-dist = [
     { name = "djangorestframework-stubs", marker = "extra == 'types-stubs'", specifier = ">=3.15.3" },
     { name = "djangorestframework-types", marker = "extra == 'types-stubs'", specifier = ">=0.9.0" },
     { name = "drf-spectacular", specifier = ">=0.28.0" },
+    { name = "gunicorn", specifier = ">=23.0.0" },
     { name = "psycopg2-binary", specifier = ">=2.9.10" },
+    { name = "python-decouple", specifier = ">=3.8" },
     { name = "setuptools", specifier = ">=78.1.0" },
     { name = "wheel", specifier = ">=0.45.1" },
 ]
@@ -860,9 +862,7 @@ provides-extras = ["types-stubs"]
 
 [package.metadata.requires-dev]
 dev = [
-    { name = "gunicorn", specifier = ">=23.0.0" },
     { name = "ipython", specifier = ">=9.0.1" },
     { name = "pytest-django", specifier = ">=4.10.0" },
-    { name = "python-decouple", specifier = ">=3.8" },
     { name = "ruff", specifier = ">=0.9.7" },
 ]

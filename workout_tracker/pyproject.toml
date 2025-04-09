@@ -9,7 +9,9 @@ dependencies = [
     "djangorestframework>=3.15.2",
     "djangorestframework-simplejwt>=5.4.0",
     "drf-spectacular>=0.28.0",
+    "gunicorn>=23.0.0",
     "psycopg2-binary>=2.9.10",
+    "python-decouple>=3.8",
     "setuptools>=78.1.0",
     "wheel>=0.45.1",
 ]
@@ -25,10 +27,8 @@ types-stubs = [
 
 [dependency-groups]
 dev = [
-    "gunicorn>=23.0.0",
     "ipython>=9.0.1",
     "pytest-django>=4.10.0",
-    "python-decouple>=3.8",
     "ruff>=0.9.7",
 ]
 
