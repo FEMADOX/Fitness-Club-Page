@@ -77,6 +77,8 @@ ROOT_URLCONF = "workout_tracker.urls"
 # SECURE_HSTS_PRELOAD = config("SECURE_HSTS_PRELOAD", cast=bool)
 # SECURE_SSL_REDIRECT = config("SECURE_SSL_REDIRECT", cast=bool)
 CSRF_COOKIE_SECURE = config("CSRF_COOKIE_SECURE", cast=bool)
+CSRF_COOKIE_HTTPONLY = config("CSRF_COOKIE_HTTPONLY", cast=bool)
+CSRF_TRUSTED_ORIGINS = config("CSRF_TRUSTED_ORIGINS", cast=list)
 SESSION_COOKIE_SECURE = config("SESSION_COOKIE_SECURE", cast=bool)
 
 TEMPLATES: list[dict[str, Any]] = [
