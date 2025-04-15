@@ -103,9 +103,6 @@ DATABASES: dict[str, dict[str, Any]] = {
         "PORT": config("DB_PORT"),
     },
 }
-STORAGES = {
-    "staticfiles": {"BACKEND": "workout_tracker.storage.S3Storage"}
-}
 
 
 # Password validation
