@@ -30,7 +30,7 @@ SECRET_KEY = config("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config("DEBUG", default=False, cast=bool)
 
-ALLOWED_HOSTS = config("ALLOWED_HOSTS", cast=list)
+ALLOWED_HOSTS = [config("ALLOWED_HOSTS")]
 
 # Application definition
 
@@ -78,7 +78,7 @@ ROOT_URLCONF = "workout_tracker.urls"
 # SECURE_SSL_REDIRECT = config("SECURE_SSL_REDIRECT", cast=bool)
 CSRF_COOKIE_SECURE = config("CSRF_COOKIE_SECURE", cast=bool)
 CSRF_COOKIE_HTTPONLY = config("CSRF_COOKIE_HTTPONLY", cast=bool)
-CSRF_TRUSTED_ORIGINS = config("CSRF_TRUSTED_ORIGINS", cast=list)
+CSRF_TRUSTED_ORIGINS = [config("CSRF_TRUSTED_ORIGINS")]
 SESSION_COOKIE_SECURE = config("SESSION_COOKIE_SECURE", cast=bool)
 
 TEMPLATES: list[dict[str, Any]] = [
@@ -182,5 +182,4 @@ SPECTACULAR_SETTINGS = {
     "DESCRIPTION": "API documentation for the Workout Tracker project",
     "VERSION": "1.0.0",
     "SERVE_INCLUDE_SCHEMA": False,
-    # OTHER SETTINGS
 }
