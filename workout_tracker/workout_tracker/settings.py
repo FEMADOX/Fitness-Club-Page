@@ -104,7 +104,7 @@ DATABASES: dict[str, dict[str, Any]] = {
     },
 }
 STORAGES = {
-    "staticfiles": {"BACKEND": "myproject.storage.S3Storage"}
+    "staticfiles": {"BACKEND": "workout_tracker.storage.S3Storage"}
 }
 
 
