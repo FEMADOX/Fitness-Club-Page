@@ -11,7 +11,7 @@ from drf_spectacular.views import (
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("workoutplan/", include("workoutplan.urls")),
-    path("api_auth/", include("workout_auth.urls")),
+    path("api-auth/", include("workout_auth.urls")),
     # Spectacular Doc
     path("api-schema/", SpectacularAPIView.as_view(), name="schema"),
     path(
@@ -24,4 +24,5 @@ urlpatterns = [
         SpectacularRedocView.as_view(url_name="schema"),
         name="redoc",
     ),
-] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+]
+# urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
