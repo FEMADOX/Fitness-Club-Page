@@ -19,14 +19,13 @@ SECRET_KEY = config("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 
-DEBUG = config("DEBUG", cast=bool)
+DEBUG = config("DEBUG", default=False, cast=bool)
 
 ALLOWED_HOSTS = [config("ALLOWED_HOSTS")]
 
 # Application definition
 
 INSTALLED_APPS = [
-    "whitenoise.runserver_nostatic",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -39,7 +38,6 @@ INSTALLED_APPS = [
     "rest_framework_simplejwt.token_blacklist",
     "pytest",
     "drf_spectacular",
-    "whitenoise",
     "workoutplan",
     "workout_auth",
 ]
@@ -54,7 +52,6 @@ REST_FRAMEWORK = {
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
-    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -143,31 +140,16 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
-STORAGES = {
-   "default": {
-       "BACKEND": "django.core.files.storage.FileSystemStorage",
-   },
-   "staticfiles": {
-       "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
-   },
-}
 
-STATIC_URL = "/static/"
-STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
+STATIC_URL = "static/"
 
-<<<<<<< Updated upstream
 STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
-=======
-# STATICFILES_DIRS = [
-#     os.path.join(BASE_DIR, "static"),
-# ]
->>>>>>> Stashed changes
 
 # Media files
 # ______________________________________________________________________
 
-# MEDIA_ROOT = BASE_DIR / "media"
-# MEDIA_URL = "media/"
+MEDIA_ROOT = BASE_DIR / "media"
+MEDIA_URL = "media/"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
