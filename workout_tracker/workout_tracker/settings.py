@@ -70,13 +70,13 @@ ROOT_URLCONF = "workout_tracker.urls"
 
 # DEPLOY SECURITY SETTINGS
 #_________________________________________________________________________________
-SECURE_HSTS_SECONDS = config("SECURE_HSTS_SECONDS", cast=int)
-SECURE_HSTS_INCLUDE_SUBDOMAINS = config("SECURE_HSTS_INCLUDE_SUBDOMAINS", cast=bool)
-SECURE_HSTS_PRELOAD = config("SECURE_HSTS_PRELOAD", cast=bool)
-SECURE_SSL_REDIRECT = config("SECURE_SSL_REDIRECT", cast=bool)
-CSRF_COOKIE_SECURE = config("CSRF_COOKIE_SECURE", cast=bool)
-CSRF_COOKIE_HTTPONLY = config("CSRF_COOKIE_HTTPONLY", cast=bool)
-SESSION_COOKIE_SECURE = config("SESSION_COOKIE_SECURE", cast=bool)
+# SECURE_HSTS_SECONDS = config("SECURE_HSTS_SECONDS", cast=int)
+# SECURE_HSTS_INCLUDE_SUBDOMAINS = config("SECURE_HSTS_INCLUDE_SUBDOMAINS", cast=bool)
+# SECURE_HSTS_PRELOAD = config("SECURE_HSTS_PRELOAD", cast=bool)
+# SECURE_SSL_REDIRECT = config("SECURE_SSL_REDIRECT", cast=bool)
+# CSRF_COOKIE_SECURE = config("CSRF_COOKIE_SECURE", cast=bool)
+# CSRF_COOKIE_HTTPONLY = config("CSRF_COOKIE_HTTPONLY", cast=bool)
+# SESSION_COOKIE_SECURE = config("SESSION_COOKIE_SECURE", cast=bool)
 
 TEMPLATES: list[dict[str, Any]] = [
     {
@@ -147,9 +147,9 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 WHITENOISE_USE_FINDERS = True
 STORAGES = {
-    "default": {
-        "BACKEND": "django.contrib.staticfiles.storage.ManifestStaticFilesStorage",
-    },
+    # "default": {
+    #     "BACKEND": "django.contrib.staticfiles.storage.ManifestStaticFilesStorage",
+    # },
     "staticfiles": {
         "BACKEND": "whitenoise.storage.CompressedStaticFilesStorage",
     },
