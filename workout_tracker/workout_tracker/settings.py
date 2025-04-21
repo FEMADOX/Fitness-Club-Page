@@ -147,23 +147,22 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 WHITENOISE_USE_FINDERS = True
 STORAGES = {
-    # "default": {
-    #     "BACKEND": "django.contrib.staticfiles.storage.ManifestStaticFilesStorage",
-    # },
+    "default": {
+        "BACKEND": "django.contrib.staticfiles.storage.ManifestStaticFilesStorage",
+    },
     "staticfiles": {
         "BACKEND": "whitenoise.storage.CompressedStaticFilesStorage",
     },
 }
 
 STATIC_URL = "static/"
-
 STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
 
 # Media files
 # ______________________________________________________________________
 
-MEDIA_ROOT = BASE_DIR / "media"
 MEDIA_URL = "media/"
+MEDIA_ROOT = BASE_DIR / "media"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
