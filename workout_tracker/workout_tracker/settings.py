@@ -23,6 +23,9 @@ DEBUG = config("DEBUG", cast=bool)
 
 ALLOWED_HOSTS = [config("ALLOWED_HOSTS")]
 
+CORS_ORIGIN_WHITELIST = [config("CORS_ORIGIN_WHITELIST")]
+CSRF_TRUSTED_ORIGINS = [config("CSRF_TRUSTED_ORIGINS")]
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -65,15 +68,14 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = "workout_tracker.urls"
 
-# Deploy Security Settings
-# SECURE_HSTS_SECONDS = config("SECURE_HSTS_SECONDS", cast=int)
-# SECURE_HSTS_INCLUDE_SUBDOMAINS = config("SECURE_HSTS_INCLUDE_SUBDOMAINS", cast=bool)
-# SECURE_HSTS_PRELOAD = config("SECURE_HSTS_PRELOAD", cast=bool)
-# SECURE_SSL_REDIRECT = config("SECURE_SSL_REDIRECT", cast=bool)
+# DEPLOY SECURITY SETTINGS
+#_________________________________________________________________________________
+SECURE_HSTS_SECONDS = config("SECURE_HSTS_SECONDS", cast=int)
+SECURE_HSTS_INCLUDE_SUBDOMAINS = config("SECURE_HSTS_INCLUDE_SUBDOMAINS", cast=bool)
+SECURE_HSTS_PRELOAD = config("SECURE_HSTS_PRELOAD", cast=bool)
+SECURE_SSL_REDIRECT = config("SECURE_SSL_REDIRECT", cast=bool)
 CSRF_COOKIE_SECURE = config("CSRF_COOKIE_SECURE", cast=bool)
 CSRF_COOKIE_HTTPONLY = config("CSRF_COOKIE_HTTPONLY", cast=bool)
-CORS_ORIGIN_WHITELIST = [config("CORS_ORIGIN_WHITELIST")]
-CSRF_TRUSTED_ORIGINS = [config("CSRF_TRUSTED_ORIGINS")]
 SESSION_COOKIE_SECURE = config("SESSION_COOKIE_SECURE", cast=bool)
 
 TEMPLATES: list[dict[str, Any]] = [
