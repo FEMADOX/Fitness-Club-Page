@@ -1,25 +1,30 @@
+import { ThemeProvider } from "@/context/theme-context";
+import Navbar from "./components/Navbar";
+import Hero from "./components/Hero";
+import Services from "./components/Services";
+import ActiveSection from "./components/ActiveSection";
+import Trainers from "./components/Trainers";
+import Testimonials from "./components/Testimonials";
+import SubscribeSection from "./components/SuscribeSection";
+import FooterSection from "./components/Footer";
 
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Index from "./pages/Index";
-import NotFound from "./pages/NotFound";
-
-const queryClient = new QueryClient();
-
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+function App() {
+  return (
+    <ThemeProvider>
+      <div className="min-h-screen bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors">
+        <Navbar />
+        <main>
+          <Hero />
+          <Services />
+          <ActiveSection />
+          <Trainers />
+          <Testimonials />
+          <SubscribeSection />
+        </main>
+        <FooterSection />
+      </div>
+    </ThemeProvider>
+  );
+}
 
 export default App;

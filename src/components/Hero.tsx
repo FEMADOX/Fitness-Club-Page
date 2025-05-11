@@ -1,11 +1,10 @@
-
 import { useIsMobile } from "@/hooks/use-mobile";
 
 const Hero = () => {
   const isMobile = useIsMobile();
 
   return (
-    <section className="relative min-h-screen bg-white overflow-hidden">
+    <section className="relative min-h-screen bg-white dark:bg-gray-900 overflow-hidden">
       <div className="container mx-auto px-4 pt-32 pb-20">
         <div className="grid md:grid-cols-2 gap-12 items-center">
           <div className="relative z-10 animate-fadeIn">
@@ -15,14 +14,14 @@ const Hero = () => {
               <br />
               And Repeat
             </h1>
-            <p className="text-gray-600 mb-8 max-w-md">
+            <p className="text-gray-600 dark:text-gray-300 mb-8 max-w-md">
               A gym is a club, building, or large room, usually containing special equipment, where people go to exercise and get fit.
             </p>
             <div className="flex flex-wrap gap-4">
               <button className="btn-primary">
                 Join Now
               </button>
-              <button className="btn-secondary">
+              <button className="btn-secondary dark:bg-gray-800 dark:text-white dark:hover:bg-gray-700">
                 Know More
               </button>
             </div>
@@ -33,7 +32,7 @@ const Hero = () => {
               <img
                 src="/Image1.png"
                 alt="Fitness"
-                className="w-full h-full object-cover rounded-2xl shadow-lg"
+                className="w-full h-full object-cover rounded-2xl shadow-lg dark:shadow-gray-800/50"
               />
             </div>
           </div>

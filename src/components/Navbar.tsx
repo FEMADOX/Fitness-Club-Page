@@ -1,17 +1,18 @@
 import { Menu } from "lucide-react";
 import { X } from "lucide-react";
 import { useState } from "react";
+import { ThemeToggle } from "./theme-toggle";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <nav className="fixed top-0 left-0 right-0 bg-white/80 backdrop-blur-md z-20 border-b">
+    <nav className="fixed top-0 left-0 right-0 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md z-20 border-b border-gray-200 dark:border-gray-800">
       <div className="container mx-auto px-4 py-4">
         <div className="flex justify-between items-center">
           <div className="flex items-center space-x-2">
             <svg
-              className="w-8 h-8 text-primary"
+              className="w-8 h-8 text-primary dark:text-primary-dark"
               viewBox="0 0 24 24"
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
@@ -26,7 +27,7 @@ const Navbar = () => {
                 fill="currentColor"
               />
             </svg>
-            <span className="font-bold text-xl text-gray-900">
+            <span className="font-bold text-xl text-gray-900 dark:text-gray-100">
               Fitness Club
             </span>
           </div>
@@ -41,55 +42,36 @@ const Navbar = () => {
             </a>
             <a
               href="#training"
-              className="text-gray-600 hover:text-primary transition-colors"
+              className="text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary-dark transition-colors"
             >
               Training
             </a>
             <a
               href="#footer"
-              className="text-gray-600 hover:text-primary transition-colors"
+              className="text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary-dark transition-colors"
             >
               Contact
             </a>
+            <ThemeToggle />
           </div>
 
           {/* Mobile Menu Button */}
-          <button className="md:hidden text-gray-600 hover:text-primary transition-colors">
-           {isOpen ? <X size={24} className="z-40 relative" onClick={() => setIsOpen(false)} /> : <Menu className="z-40 relative" size={24} onClick={() => setIsOpen(true)} />}
-
-            {isOpen && (
-              <div className="fixed h-screen inset-0 top-0 bottom-0 z-10 bg-white/95 backdrop-blur-lg">
-                <div className="absolute top-0 left-0 right-0 bottom-0 flex flex-col items-center justify-center">
-                  <div className="w-full max-w-md px-4 py-4">
-                    <div className="flex flex-col gap-4 ">
-                      <a
-                        href="#hero"
-                        className="text-gray-800 font-bold hover:text-primary transition-colors"
-                      >
-                        Home
-                      </a>
-                      <a
-                        href="#training"
-                        className="text-gray-800 font-bold hover:text-primary transition-colors"
-                      >
-                        Training
-                      </a>
-                      <a
-                        href="#footer"
-                        className="text-gray-800 font-bold hover:text-primary transition-colors"
-                      >
-                        Contact
-                      </a>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-          </button>
+          <div className="flex items-center space-x-4 md:hidden">
+            <ThemeToggle />
+            <button className="text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary-dark transition-colors">
+              {isOpen ? (
+                <X size={24} className="z-40 relative" onClick={() => setIsOpen(false)} />
+              ) : (
+                <Menu className="z-40 relative" size={24} onClick={() => setIsOpen(true)} />
+              )}
+            </button>
+          </div>
         </div>
       </div>
     </nav>
   );
 };
 
-export default Navbar;
+export default Navbar;  
+
+                   
