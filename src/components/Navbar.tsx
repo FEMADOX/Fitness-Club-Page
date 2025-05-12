@@ -1,6 +1,7 @@
 import { Menu } from "lucide-react";
 import { X } from "lucide-react";
 import { useState } from "react";
+import { Link } from "wouter";
 import { ThemeToggle } from "./theme-toggle";
 
 const Navbar = () => {
@@ -10,7 +11,7 @@ const Navbar = () => {
     <nav className="fixed top-0 left-0 right-0 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md z-20 border-b border-gray-200 dark:border-gray-800">
       <div className="container mx-auto px-4 py-4">
         <div className="flex justify-between items-center">
-          <div className="flex items-center space-x-2">
+          <Link href="/" className="flex items-center space-x-2">
             <svg
               className="w-8 h-8 text-primary dark:text-primary-dark"
               viewBox="0 0 24 24"
@@ -30,28 +31,19 @@ const Navbar = () => {
             <span className="font-bold text-xl text-gray-900 dark:text-gray-100">
               Fitness Club
             </span>
-          </div>
+          </Link>
 
           {/* Desktop Menu */}
           <div className="hidden md:flex items-center space-x-8">
-            <a
-              href="#hero"
-              className="text-gray-600 hover:text-primary transition-colors"
-            >
+            <Link href="/" className="text-gray-600 hover:text-primary transition-colors">
               Home
-            </a>
-            <a
-              href="#training"
-              className="text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary-dark transition-colors"
-            >
+            </Link>
+            <Link href="/know-more" className="text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary-dark transition-colors">
               Training
-            </a>
-            <a
-              href="#footer"
-              className="text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary-dark transition-colors"
-            >
+            </Link>
+            <Link href="#footer" className="text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary-dark transition-colors">
               Contact
-            </a>
+            </Link>
             <ThemeToggle />
           </div>
 
@@ -67,6 +59,23 @@ const Navbar = () => {
             </button>
           </div>
         </div>
+
+        {/* Mobile Menu */}
+        {isOpen && (
+          <div className="md:hidden absolute top-full left-0 right-0 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 py-4">
+            <div className="container mx-auto px-4 space-y-4">
+              <Link href="/" className="block text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary-dark transition-colors">
+                Home
+              </Link>
+              <Link href="/know-more" className="block text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary-dark transition-colors">
+                Training
+              </Link>
+              <Link href="#footer" className="block text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary-dark transition-colors">
+                Contact
+              </Link>
+            </div>
+          </div>
+        )}
       </div>
     </nav>
   );

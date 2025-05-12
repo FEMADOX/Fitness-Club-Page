@@ -1,4 +1,5 @@
 import { useIsMobile } from "@/hooks/use-mobile";
+import { Link } from "wouter";
 
 const Hero = () => {
   const isMobile = useIsMobile();
@@ -18,12 +19,16 @@ const Hero = () => {
               A gym is a club, building, or large room, usually containing special equipment, where people go to exercise and get fit.
             </p>
             <div className="flex flex-wrap gap-4">
-              <button className="btn-primary">
-                Join Now
-              </button>
-              <button className="btn-secondary dark:bg-gray-800 dark:text-white dark:hover:bg-gray-700">
-                Know More
-              </button>
+              <Link href="/register">
+                <button className="btn-primary">
+                  Join Now
+                </button>
+              </Link>
+              <Link href="/know-more">
+                <button className="btn-secondary dark:bg-gray-800 dark:text-white dark:hover:bg-gray-700">
+                  Know More
+                </button>
+              </Link>
             </div>
           </div>
           
