@@ -1,26 +1,25 @@
 import { ThemeProvider } from "@/context/theme-context";
+import { Route, Switch } from "wouter";
 import Navbar from "./components/Navbar";
-import Hero from "./components/Hero";
-import Services from "./components/Services";
-import ActiveSection from "./components/ActiveSection";
-import Trainers from "./components/Trainers";
-import Testimonials from "./components/Testimonials";
-import SubscribeSection from "./components/SuscribeSection";
 import FooterSection from "./components/Footer";
+import Register from "./pages/Register";
+import KnowMore from "./pages/KnowMore";
+import Login from "./pages/Login";
+import NotFound from "./pages/NotFound";
+import Index from "./pages/Index";
 
 function App() {
   return (
     <ThemeProvider>
       <div className="min-h-screen bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors">
         <Navbar />
-        <main>
-          <Hero />
-          <Services />
-          <ActiveSection />
-          <Trainers />
-          <Testimonials />
-          <SubscribeSection />
-        </main>
+        <Switch>
+          <Route path="/" component={Index} />
+          <Route path="/register" component={Register} />
+          <Route path="/know-more" component={KnowMore} />
+          <Route path="/login" component={Login} />
+          <Route component={NotFound} />
+        </Switch>
         <FooterSection />
       </div>
     </ThemeProvider>

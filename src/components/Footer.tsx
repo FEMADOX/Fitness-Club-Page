@@ -1,4 +1,5 @@
 import { Dumbbell } from "lucide-react";
+import { Link } from "wouter";
 
 const FooterSection = () => {
   return (
@@ -46,24 +47,24 @@ const FooterSection = () => {
             <h4 className="text-white font-semibold text-lg">Company</h4>
             <ul className="space-y-2">
               <li>
-                <a href="#" className="hover:text-primary dark:hover:text-primary-dark transition">
+                <Link href="/login" className="hover:text-primary dark:hover:text-primary-dark transition">
+                  Login
+                </Link>
+              </li>
+              <li>
+                <Link href="/register" className="hover:text-primary dark:hover:text-primary-dark transition">
+                  Register
+                </Link>
+              </li>
+              <li>
+                <Link href="#" className="hover:text-primary dark:hover:text-primary-dark transition">
                   About Us
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#" className="hover:text-primary dark:hover:text-primary-dark transition">
-                  Careers
-                </a>
-              </li>
-              <li>
-                <a href="#" className="hover:text-primary dark:hover:text-primary-dark transition">
-                  Partners
-                </a>
-              </li>
-              <li>
-                <a href="#" className="hover:text-primary dark:hover:text-primary-dark transition">
+                <Link href="#" className="hover:text-primary dark:hover:text-primary-dark transition">
                   Contact
-                </a>
+                </Link>
               </li>
             </ul>
           </div>
