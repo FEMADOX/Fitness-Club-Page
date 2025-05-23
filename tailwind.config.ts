@@ -1,8 +1,7 @@
-
 import type { Config } from "tailwindcss";
 
 export default {
-  darkMode: ["class"],
+  darkMode: "class",
   content: ["./src/**/*.{ts,tsx}"],
   theme: {
     container: {
@@ -19,12 +18,21 @@ export default {
         ring: "hsl(var(--ring))",
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
-        primary: "#FF3850",
+        primary: {
+          DEFAULT: "#FF3850",
+          dark: "#FF4D63",
+        },
         yellow: {
           DEFAULT: "#FFD84D",
           50: "#FFFBF0",
           100: "#FFE7B3",
           200: "#FFD84D",
+          dark: {
+            DEFAULT: "#FFE066",
+            50: "#1A1A0A",
+            100: "#332D0A",
+            200: "#FFE066",
+          },
         },
         gray: {
           DEFAULT: "#2D2D2D",
@@ -38,6 +46,19 @@ export default {
           700: "#4D4D4D",
           800: "#333333",
           900: "#2D2D2D",
+          dark: {
+            DEFAULT: "#E6E6E6",
+            50: "#1A1A1A",
+            100: "#2D2D2D",
+            200: "#404040",
+            300: "#4D4D4D",
+            400: "#666666",
+            500: "#808080",
+            600: "#999999",
+            700: "#B3B3B3",
+            800: "#CCCCCC",
+            900: "#E6E6E6",
+          },
         },
       },
       fontFamily: {

@@ -1,25 +1,29 @@
-
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Index from "./pages/Index";
+import { ThemeProvider } from "@/context/theme-context";
+import { Route, Switch } from "wouter";
+import Navbar from "./components/Navbar";
+import FooterSection from "./components/Footer";
+import Register from "./pages/Register";
+import KnowMore from "./pages/KnowMore";
+import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
+import Index from "./pages/Index";
 
-const queryClient = new QueryClient();
-
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+function App() {
+  return (
+    <ThemeProvider>
+      <div className="min-h-screen bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors">
+        <Navbar />
+        <Switch>
+          <Route path="/" component={Index} />
+          <Route path="/register" component={Register} />
+          <Route path="/know-more" component={KnowMore} />
+          <Route path="/login" component={Login} />
+          <Route component={NotFound} />
+        </Switch>
+        <FooterSection />
+      </div>
+    </ThemeProvider>
+  );
+}
 
 export default App;
