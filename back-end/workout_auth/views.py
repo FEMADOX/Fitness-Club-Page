@@ -140,7 +140,7 @@ class LoginView(TokenObtainPairView):
                 {
                     "message": "Invalid Credentials",
                 },
-                status.HTTP_102_PROCESSING,
+                status.HTTP_401_UNAUTHORIZED,
             )
         except Exception as error:  # noqa: BLE001
             return Response(
@@ -160,6 +160,13 @@ class LogoutView(generics.GenericAPIView):
         try:
             refresh_token: Token | None = request.data["refresh"]  # type: ignore
             token = RefreshToken(refresh_token)
+            if not token:
+                return Response(
+                    {
+                        "message": "Refresh token is required",
+                    },
+                    status.HTTP_400_BAD_REQUEST,
+                )
             if token.check_blacklist():
                 return Response(
                     {
@@ -167,7 +174,7 @@ class LogoutView(generics.GenericAPIView):
                     },
                     status.HTTP_409_CONFLICT,
                 )
-            token.blacklist()  # type: ignore
+            token.blacklist()
 
             return Response(
                 {
