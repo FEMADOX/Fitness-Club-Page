@@ -17,7 +17,7 @@ const Navbar = () => {
   }, [isAuthorized, setIsAuthorized])
 
   const registration = () => {
-    const registrationURLs = ['/login', '/signup', '/logout']
+    const registrationURLs = ['/login', '/register', '/logout']
     if (registrationURLs.includes(location)) return null
     if (isAuthorized)
       return (

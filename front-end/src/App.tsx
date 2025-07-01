@@ -1,14 +1,14 @@
 import { ThemeProvider } from '@/context/theme-context'
-import { Redirect, Route, Switch } from 'wouter'
+import { Route, Switch } from 'wouter'
 import Navbar from './components/Navbar'
 import FooterSection from './components/Footer'
-import Register from './pages/Register'
 import KnowMore from './pages/KnowMore'
-import Login from './pages/Login'
 import NotFound from './pages/NotFound'
 import Index from './pages/Index'
 import Logout from './components/Logout'
 import { ProtectedRegistrationRoute, ProtectedRoute } from './components/ProtectedRoute'
+import RegistrationForm from './components/RegistrationForm'
+import { LOGIN_URL, REGISTER_URL } from './api/constants'
 
 function App() {
   const protectedRoute = (children: JSX.Element, url: string) => {
@@ -24,10 +24,20 @@ function App() {
         <Navbar />
         <Switch>
           <Route path="/" component={Index} />
-          <Route path="/login" component={() => authorizedNotAvailable(<Login />)} />
-          <Route path="/register" component={() => authorizedNotAvailable(<Register />)} />
-          {/* <Route path="/logout" component={() => authorizedAvailable(<Logout />)} /> */}
-          {/* <Route path="/know-more" component={() => authorizedAvailable(<KnowMore />)} /> */}
+          <Route
+            path="/login"
+            component={() =>
+              authorizedNotAvailable(<RegistrationForm apiUrl={LOGIN_URL} registerUrl="/login" />)
+            }
+          />
+          <Route
+            path="/register"
+            component={() =>
+              authorizedNotAvailable(
+                <RegistrationForm apiUrl={REGISTER_URL} registerUrl="/register" />
+              )
+            }
+          />
           <Route path="/logout" component={() => <Logout />} />
           <Route path="/know-more" component={() => protectedRoute(<KnowMore />, '/login')} />
           <Route component={NotFound} />

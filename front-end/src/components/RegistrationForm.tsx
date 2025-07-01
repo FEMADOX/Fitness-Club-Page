@@ -1,13 +1,12 @@
 import api from '@/api/api'
-import { LOGIN_URL } from '@/api/constants'
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { GoogleIcon } from '@/components/ui/google-logo'
 import useAuthStore from '@/stores/authStore'
-import { AlertCircleIcon, CheckCircle2Icon } from 'lucide-react'
 import { useState } from 'react'
 import { Link, useLocation } from 'wouter'
+import { Alert, AlertDescription, AlertTitle } from './ui/alert'
+import { AlertCircleIcon } from 'lucide-react'
 
-const Login = () => {
+const RegistrationForm = ({ apiUrl, registerUrl }: { apiUrl: string; registerUrl: string }) => {
   const [formData, setFormData] = useState({
     username: '',
     password: ''
@@ -19,7 +18,6 @@ const Login = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     setLoading(true)
-    setInvalidCredentials(false)
     e.preventDefault()
 
     const form = e.target as HTMLFormElement
@@ -27,7 +25,7 @@ const Login = () => {
     const password = (form.password as HTMLInputElement).value
 
     try {
-      const response = await api.post(LOGIN_URL, { username, password })
+      const response = await api.post(apiUrl, { username, password })
       if (response.status === 200) {
         localStorage.setItem('access', response.data.access)
         localStorage.setItem('refresh', response.data.refresh)
@@ -35,7 +33,9 @@ const Login = () => {
         navigate('/')
       }
       if (response.status !== 200) {
-        setInvalidCredentials(true)
+        alert('Failed to register')
+        console.error(response.statusText)
+        navigate(registerUrl)
       }
     } catch (error) {
       if (error.response && error.response.status === 401) setInvalidCredentials(true)
@@ -52,11 +52,6 @@ const Login = () => {
       ...prev,
       [name]: value
     }))
-  }
-
-  const handleFacebookLogin = () => {
-    // TODO: Implement Facebook login logic
-    console.log('Facebook login clicked')
   }
 
   const handleGoogleLogin = () => {
@@ -89,10 +84,10 @@ const Login = () => {
       <div className="container mx-auto px-4">
         <div className="max-w-md mx-auto bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8">
           <h1 className="text-3xl font-bold text-center mb-8 text-gray-900 dark:text-white">
-            Welcome Back
+            {registerUrl === '/login' ? 'Welcom Back' : 'Create an Account'}
           </h1>
 
-          <form method="post" onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-6">
             <div>
               <label
                 htmlFor="username"
@@ -130,32 +125,35 @@ const Login = () => {
             </div>
 
             {renderRegistrationMessage()}
+            {registerUrl === '/login' && (
+              <>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center">
+                    <input
+                      id="remember-me"
+                      name="remember-me"
+                      type="checkbox"
+                      className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded"
+                    />
+                    <label
+                      htmlFor="remember-me"
+                      className="ml-2 block text-sm text-gray-700 dark:text-gray-300"
+                    >
+                      Remember me
+                    </label>
+                  </div>
 
-            <div className="flex items-center justify-between">
-              <div className="flex items-center">
-                <input
-                  id="remember-me"
-                  name="remember-me"
-                  type="checkbox"
-                  className="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded"
-                />
-                <label
-                  htmlFor="remember-me"
-                  className="ml-2 block text-sm text-gray-700 dark:text-gray-300"
-                >
-                  Remember me
-                </label>
-              </div>
-
-              <div className="text-sm">
-                <a href="#" className="text-primary hover:text-primary-dark">
-                  Forgot your password?
-                </a>
-              </div>
-            </div>
+                  <div className="text-sm">
+                    <a href="#" className="text-primary hover:text-primary-dark">
+                      Forgot your password?
+                    </a>
+                  </div>
+                </div>
+              </>
+            )}
 
             <button type="submit" className="w-full btn-primary">
-              Sign In
+              {registerUrl === '/login' ? ' Login' : ' Register'}
             </button>
 
             <div className="relative">
@@ -179,23 +177,19 @@ const Login = () => {
             </button>
           </form>
 
-          <div className="mt-6 space-y-4">
-            <p className="text-center text-sm text-gray-600 dark:text-gray-400">
-              Don't have an account?{' '}
-              <Link href="/register" className="text-primary hover:text-primary-dark font-medium">
-                Create an account
-              </Link>
-            </p>
-            {/* <p className="text-center text-sm text-gray-600 dark:text-gray-400">
-              <Link href="/" className="text-primary hover:text-primary-dark">
-                Back to home
-              </Link>
-            </p> */}
-          </div>
+          <p className="mt-4 text-center text-sm text-gray-600 dark:text-gray-400">
+            {registerUrl === '/login' ? "Don't have an account?" : 'Already have an account?'}{' '}
+            <Link
+              href={registerUrl === '/login' ? '/register' : '/login'}
+              className="text-primary hover:text-primary-dark"
+            >
+              {registerUrl === '/login' ? 'Create an account' : 'Log in'}
+            </Link>
+          </p>
         </div>
       </div>
     </section>
   )
 }
 
-export default Login
+export default RegistrationForm

@@ -2,7 +2,6 @@ import api from '@/api/api'
 import { REGISTER_URL } from '@/api/constants'
 import { GoogleIcon } from '@/components/ui/google-logo'
 import useAuthStore from '@/stores/authStore'
-import axios from 'axios'
 import { useState } from 'react'
 import { Link, useLocation } from 'wouter'
 
