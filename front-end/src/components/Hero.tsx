@@ -37,7 +37,7 @@ const Hero = () => {
               <img
                 src="/Image1.png"
                 alt="Fitness"
-                className="w-full h-full object-cover rounded-2xl shadow-lg dark:shadow-gray-800/50"
+                className="w-full h-full object-cover rounded-2xl rounded-bl-[70px] shadow-lg dark:shadow-gray-800/50"
               />
             </div>
           </div>

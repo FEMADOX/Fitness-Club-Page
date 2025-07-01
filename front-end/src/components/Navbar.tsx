@@ -1,12 +1,37 @@
 import { Menu } from 'lucide-react'
 import { X } from 'lucide-react'
-import { useState } from 'react'
-import { Link } from 'wouter'
+import { useEffect, useState } from 'react'
+import { Link, useLocation } from 'wouter'
 import { ThemeToggle } from './theme-toggle'
+import { Button } from './ui/button'
+import useAuthStore from '@/stores/authStore'
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false)
-  // const [activeLink, setActiveLink] = useState('')
+  const { isAuthorized, setIsAuthorized } = useAuthStore()
+  const [location] = useLocation()
+
+  useEffect(() => {
+    const token = localStorage.getItem('refresh')
+    setIsAuthorized(token !== null)
+  }, [isAuthorized, setIsAuthorized])
+
+  const registration = () => {
+    const registrationURLs = ['/login', '/signup', '/logout']
+    if (registrationURLs.includes(location)) return null
+    if (isAuthorized)
+      return (
+        <Button className="bg-primary text-white hover:bg-primary-dark transition-colors">
+          <a href="/logout">Logout</a>
+        </Button>
+      )
+    if (!isAuthorized)
+      return (
+        <Button className="bg-primary text-white hover:bg-primary-dark transition-colors">
+          <a href="/login">Login</a>
+        </Button>
+      )
+  }
 
   return (
     <nav className="fixed top-0 left-0 right-0 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md z-20 border-b border-gray-200 dark:border-gray-800">
@@ -40,18 +65,19 @@ const Navbar = () => {
             >
               Home
             </Link>
-            <Link
+            <a
               href="/know-more"
               className="text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary-dark transition-colors"
             >
               Training
-            </Link>
+            </a>
             <a
               href="#footer"
               className="text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary-dark transition-colors"
             >
               Contact
             </a>
+            {registration()}
             <ThemeToggle />
           </div>
 
@@ -62,7 +88,7 @@ const Navbar = () => {
               {isOpen ? (
                 <X size={24} className="z-40 relative" onClick={() => setIsOpen(false)} />
               ) : (
-                <Menu className="z-40 relative" size={24} onClick={() => setIsOpen(true)} />
+                <Menu size={24} className="z-40 relative" onClick={() => setIsOpen(true)} />
               )}
             </button>
           </div>
@@ -70,7 +96,10 @@ const Navbar = () => {
 
         {/* Mobile Menu */}
         {isOpen && (
-          <div className="md:hidden absolute top-full left-0 right-0 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 py-4">
+          <div
+            className="md:hidden absolute top-full left-0 right-0 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 py-4"
+            onMouseLeave={() => setIsOpen(false)}
+          >
             <div className="container mx-auto px-4 space-y-4">
               <Link
                 href="/"
@@ -78,18 +107,19 @@ const Navbar = () => {
               >
                 Home
               </Link>
-              <Link
+              <a
                 href="/know-more"
                 className="block text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary-dark transition-colors"
               >
                 Training
-              </Link>
-              <Link
+              </a>
+              <a
                 href="#footer"
                 className="block text-gray-600 dark:text-gray-300 hover:text-primary dark:hover:text-primary-dark transition-colors"
               >
                 Contact
-              </Link>
+              </a>
+              {registration()}
             </div>
           </div>
         )}

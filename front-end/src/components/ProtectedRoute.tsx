@@ -1,31 +1,33 @@
-import { useEffect, useState } from 'react'
+/* eslint-disable react-hooks/exhaustive-deps */
+import api from '@/api/api'
+import { ACCESS_TOKEN, REFRESH_TOKEN, REFRESH_URL } from '@/api/constants'
+import useAuthStore from '@/stores/authStore'
+import { useEffect } from 'react'
 import { jwtDecode } from 'jwt-decode'
-import { ACCESS_TOKEN, REFRESH_TOKEN } from './api/constants'
-import api from './api/api'
-import { Redirect } from 'wouter'
+import { Redirect, useLocation } from 'wouter'
 
-const ProtectedRoute = ({ children }) => {
-  const [isAuthorized, setIsAuthorized] = useState(null)
+const ProtectedRoute = ({ children, url }) => {
+  const { isAuthorized, setIsAuthorized } = useAuthStore()
+  const [, navigate] = useLocation()
 
   useEffect(() => {
     auth().catch(() => setIsAuthorized(false))
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const refreshToken = async () => {
     const refreshToken = localStorage.getItem(REFRESH_TOKEN)
     try {
-      const response = await api.post('/api/token/refresh/', { refresh: refreshToken })
-      if (response.status === 200) {
+      const response = await api.post(REFRESH_URL, { refresh: refreshToken })
+      if (response.status < 300 && response.status > 199) {
         localStorage.setItem(ACCESS_TOKEN, response.data.access)
         setIsAuthorized(true)
       }
-      if (response.status !== 200) {
-        console.error('Failed to refresh token')
+      if (response.status > 299) {
+        console.log(response.data.message)
         setIsAuthorized(false)
       }
     } catch (error) {
-      console.error(error)
+      console.error('Token refresh failed:', error)
       setIsAuthorized(false)
     }
   }
@@ -42,16 +44,63 @@ const ProtectedRoute = ({ children }) => {
 
     if (tokenExpiration < now) {
       await refreshToken()
-    } else {
+    }
+    if (tokenExpiration > now) {
       setIsAuthorized(true)
     }
   }
 
-  if (isAuthorized === null) {
-    return <div>Loading...</div>
-  }
+  if (isAuthorized === null) return <h1>LOADING...</h1>
 
-  return isAuthorized ? children : <Redirect to="/login" />
+  return isAuthorized ? children : <Redirect to={url} />
 }
 
-export default ProtectedRoute
+const ProtectedRegistrationRoute = ({ children, url }) => {
+  const { isAuthorized, setIsAuthorized } = useAuthStore()
+  const [, navigate] = useLocation()
+
+  useEffect(() => {
+    auth().catch(() => setIsAuthorized(false))
+  }, [])
+
+  const refreshToken = async () => {
+    const refreshToken = localStorage.getItem(REFRESH_TOKEN)
+    try {
+      const response = await api.post(REFRESH_URL, { refresh: refreshToken })
+      if (response.status < 300 && response.status > 199) {
+        localStorage.setItem(ACCESS_TOKEN, response.data.access)
+        setIsAuthorized(true)
+      }
+      if (response.status > 299) {
+        console.log(response.data.message)
+        setIsAuthorized(false)
+      }
+    } catch (error) {
+      console.error('Token refresh failed:', error)
+      setIsAuthorized(false)
+    }
+  }
+
+  const auth = async () => {
+    const token = localStorage.getItem(ACCESS_TOKEN)
+    if (!token) {
+      setIsAuthorized(false)
+      return
+    }
+    const decode = jwtDecode(token)
+    const tokenExpiration = decode.exp
+    const now = Date.now() / 1000
+
+    if (tokenExpiration < now) {
+      await refreshToken()
+    }
+    if (tokenExpiration > now) {
+      setIsAuthorized(true)
+    }
+  }
+
+  if (isAuthorized === null) return <h1>LOADING...</h1>
+
+  return !isAuthorized ? children : <Redirect to={url} />
+}
+export { ProtectedRoute, ProtectedRegistrationRoute }

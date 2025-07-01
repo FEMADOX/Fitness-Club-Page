@@ -1,7 +1,9 @@
 import { useState } from 'react'
 import { Link, useLocation } from 'wouter'
 import { GoogleIcon } from '@/components/ui/google-logo'
-import api from '@/components/api/api'
+import api from '@/api/api'
+import { LOGIN_URL } from '@/api/constants'
+import useAuthStore from '@/stores/authStore'
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -10,29 +12,31 @@ const Login = () => {
   })
   const [loading, setLoading] = useState(false)
   const [, navigate] = useLocation()
+  const setIsAuthorized = useAuthStore(state => state.setIsAuthorized)
 
   const handleSubmit = async (e: React.FormEvent) => {
     setLoading(true)
     e.preventDefault()
-    // TODO: Implement login logic
+
     const form = e.target as HTMLFormElement
     const username = (form.username as HTMLInputElement).value
     const password = (form.password as HTMLInputElement).value
 
     try {
-      const response = await api.post('/api-auth/login/', { username, password }) 
+      const response = await api.post(LOGIN_URL, { username, password })
       if (response.status === 200) {
         localStorage.setItem('access', response.data.access)
         localStorage.setItem('refresh', response.data.refresh)
+        setIsAuthorized(true)
         navigate('/')
       }
-      if (response.status !== 200) {
-        alert('Failed to Login')
-        console.error(response.statusText)
-        navigate('/login')
+      if (response.status === 102) {
+        // TODO inmplement invalid credencials for Login and Register
+        return <span>INVALID CREDENCIAL</span>
       }
     } catch (error) {
-      alert(error) 
+      alert(error)
+      console.error(error.response.data)
     } finally {
       setLoading(false)
     }
@@ -64,7 +68,7 @@ const Login = () => {
             Welcome Back
           </h1>
 
-          <form method='post' onSubmit={handleSubmit} className="space-y-6">
+          <form method="post" onSubmit={handleSubmit} className="space-y-6">
             <div>
               <label
                 htmlFor="username"

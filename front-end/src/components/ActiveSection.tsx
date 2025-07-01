@@ -21,7 +21,7 @@ const ActiveSection = () => {
             <img
               src="/Image2.png"
               alt="Active person exercising"
-              className="w-full rounded-2xl shadow-lg dark:shadow-gray-800/50"
+              className="w-full rounded-2xl rounded-tl-[70px] shadow-lg dark:shadow-gray-800/50"
             />
             <div className="absolute -bottom-4 -right-4 w-32 h-32 bg-yellow-100 dark:bg-yellow-dark-100 rounded-full -z-10" />
           </div>

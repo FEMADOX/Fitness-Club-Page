@@ -53,7 +53,7 @@ const Services = () => {
             <img
               src="/Image.png"
               alt="Woman exercising"
-              className="relative z-10 rounded-2xl w-full shadow-lg dark:shadow-gray-800/50"
+              className="relative z-10 rounded-2xl rounded-br-[85px] w-full shadow-lg dark:shadow-gray-800/50"
             />
           </div>
           <div>

@@ -1,5 +1,7 @@
-import api from '@/components/api/api'
+import api from '@/api/api'
+import { REGISTER_URL } from '@/api/constants'
 import { GoogleIcon } from '@/components/ui/google-logo'
+import useAuthStore from '@/stores/authStore'
 import axios from 'axios'
 import { useState } from 'react'
 import { Link, useLocation } from 'wouter'
@@ -11,6 +13,7 @@ const Register = () => {
   })
   const [loading, setLoading] = useState(false)
   const [, navigate] = useLocation()
+  const setIsAuthorized = useAuthStore(state => state.setIsAuthorized)
 
   const handleSubmit = async (e: React.FormEvent) => {
     setLoading(true)
@@ -21,11 +24,11 @@ const Register = () => {
     const password = (form.password as HTMLInputElement).value
 
     try {
-      const response = await api.post('/api-auth/signup/', { username, password })
-      if (response.status < 300) {
-        const loginResponse = await api.post('/api-auth/login/', { username, password })
-        localStorage.setItem('access', loginResponse.data.access)
-        localStorage.setItem('refresh', loginResponse.data.refresh)
+      const response = await api.post(REGISTER_URL, { username, password })
+      if (response.status === 200) {
+        localStorage.setItem('access', response.data.access)
+        localStorage.setItem('refresh', response.data.refresh)
+        setIsAuthorized(true)
         navigate('/')
       }
       if (response.status > 299) {
@@ -35,6 +38,7 @@ const Register = () => {
       }
     } catch (error) {
       alert(error)
+      console.error(error.response.data['message'])
     } finally {
       setLoading(false)
     }
