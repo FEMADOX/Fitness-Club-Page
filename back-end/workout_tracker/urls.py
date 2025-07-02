@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 """
 URL configuration for workout_tracker project.
 
@@ -15,6 +16,8 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 
+=======
+>>>>>>> 2f2c36fb299e391bd3fb2c162bd9a3e779f0001c
 from django.contrib import admin
 from django.urls import include, path
 from drf_spectacular.views import (
@@ -26,6 +29,7 @@ from drf_spectacular.views import (
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("workoutplan/", include("workoutplan.urls")),
+<<<<<<< HEAD
     path("api_auth/", include("workout_auth.urls")),
     # Spectacular Doc
     path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
@@ -36,6 +40,18 @@ urlpatterns = [
     ),
     path(
         "api/schema/redoc/",
+=======
+    path("api-auth/", include("workout_auth.urls")),
+    # Spectacular Doc
+    path("api-schema/", SpectacularAPIView.as_view(), name="schema"),
+    path(
+        "api-schema/swagger/",
+        SpectacularSwaggerView.as_view(url_name="schema"),
+        name="swagger",
+    ),
+    path(
+        "api-schema/redoc/",
+>>>>>>> 2f2c36fb299e391bd3fb2c162bd9a3e779f0001c
         SpectacularRedocView.as_view(url_name="schema"),
         name="redoc",
     ),

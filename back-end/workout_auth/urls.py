@@ -16,9 +16,9 @@ urlpatterns: list[URLPattern | URLResolver] = [
         name="token_obtain_pair",
     ),
     path(
-        "token/refresh",
+        "token/refresh/",
         TokenRefreshView.as_view(),
-        name="token_refresh",
+        name="token-refresh",
     ),
     path(
         "login/",

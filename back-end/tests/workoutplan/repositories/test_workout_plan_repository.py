@@ -7,6 +7,7 @@ from unittest.mock import MagicMock
 import pytest
 from django.contrib.auth.models import User
 
+from common.exceptions import UserDoesntExistException
 from workoutplan.models import Category, Exercise, MuscleGroup, Workout, WorkoutPlan
 from workoutplan.repositories.workout_plan_repository import (
     UserRepository,
@@ -106,17 +107,16 @@ class TestWorkoutPlanRepository:
         new_workouts = WorkoutPlanRepository.update_workouts(no_id_workouts)
 
         # Positive case: existing workouts
-        # Mock filter to return a valid queryset
-        # Workout.objects.filter = MagicMock(
-        #     return_value=MagicMock(
-        #         exists=MagicMock(return_value=True),
-        #         __iter__=lambda self: iter(self.workouts),
-        #     ),
-        # )
-        existing_wokourts = WorkoutPlanRepository.update_workouts(self.workouts)
+        Workout.objects.filter = MagicMock(
+            return_value=MagicMock(
+                exists=MagicMock(return_value=True),
+                __iter__=MagicMock(return_value=iter(self.workouts)),
+            ),
+        )
+        existing_workouts = WorkoutPlanRepository.update_workouts(self.workouts)
 
         assert new_workouts == []
-        assert existing_wokourts != []
+        assert existing_workouts != []
         Workout.objects.bulk_update.assert_called_once_with(
             self.workouts,
             ["exercise", "repetitions", "sets", "weight"],
@@ -154,6 +154,13 @@ class TestWorkoutPlanRepository:
         self.workout_plan.workouts.clear = MagicMock()
         self.workout_plan.workouts.add = MagicMock()
         self.workout_plan.save = MagicMock()
+        WorkoutPlanRepository.update_workouts = MagicMock(
+            return_value=MagicMock(
+                exists=MagicMock(return_value=True),
+                # return_value=
+                __iter__=MagicMock(return_value=iter(self.workouts)),
+            ),
+        )
 
         updated_plan = method(
             workout_plan=self.workout_plan,
@@ -178,15 +185,16 @@ class TestUserRepository:
     ) -> None:
         self.user: User = request.getfixturevalue("user_fixture")
 
-    @pytest.mark.skip(reason="In develop")
+    # @pytest.mark.skip(reason="In develop")
     def test_user_exist(self) -> None:
         logger.info("Test user_exist method")
 
         # Positive case: user exists
-        # User.objects.get = MagicMock(return_value=MagicMock(spec=User))
+        User.objects.get = MagicMock(return_value=MagicMock(spec=User))
         UserRepository.user_exist(self.user.pk)
+        logger.info("User %s exists", self.user.pk)
 
         # Negative case: user does not exist
-        # User.objects.get = MagicMock(side_effect=User.DoesNotExist)
-        with pytest.raises(User.DoesNotExist):
-            UserRepository.user_exist(self.user.pk)
+        User.objects.get = MagicMock(side_effect=User.DoesNotExist)
+        with pytest.raises(UserDoesntExistException):
+            UserRepository.user_exist(2)

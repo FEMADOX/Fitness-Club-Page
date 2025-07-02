@@ -1,13 +1,21 @@
 from django.contrib.auth import get_user_model
 from rest_framework import generics, status, viewsets
 from rest_framework.decorators import action
+<<<<<<< HEAD
+=======
+from rest_framework.exceptions import AuthenticationFailed, ValidationError
+>>>>>>> 2f2c36fb299e391bd3fb2c162bd9a3e779f0001c
 from rest_framework.permissions import AllowAny
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework_simplejwt.exceptions import TokenError
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+<<<<<<< HEAD
 from rest_framework_simplejwt.tokens import RefreshToken
+=======
+from rest_framework_simplejwt.tokens import RefreshToken, Token
+>>>>>>> 2f2c36fb299e391bd3fb2c162bd9a3e779f0001c
 from rest_framework_simplejwt.views import TokenObtainPairView
 
 from common.permissions import IsUserOrAdmin
@@ -56,6 +64,7 @@ class SignUpView(generics.CreateAPIView):
 
     def post(self, request: Request) -> Response:
         serializer = self.get_serializer(data=request.data)
+<<<<<<< HEAD
         serializer.is_valid(raise_exception=True)
 
         user = serializer.save()
@@ -66,12 +75,104 @@ class SignUpView(generics.CreateAPIView):
             },
             status.HTTP_201_CREATED,
         )
+=======
+        try:
+            serializer.is_valid(raise_exception=True)
+
+            user = serializer.save()
+
+            # Generate JWT tokens for the new user
+            token_serializer = TokenObtainPairSerializer(
+                data={
+                    "username": request.data["username"],
+                    "password": request.data["password"],
+                },
+            )
+            token_serializer.is_valid(raise_exception=True)
+            tokens = token_serializer.validated_data
+
+            return Response(
+                {
+                    "user": UserSerializer(user).data,
+                    "access": tokens["access"],
+                    "refresh": tokens["refresh"],
+                    "message": "User Created and Logged In Successfully",
+                },
+                status.HTTP_200_OK,
+            )
+        # User Already Exists
+        except ValidationError:
+            token_serializer = TokenObtainPairSerializer(
+                data={
+                    "username": request.data["username"],
+                    "password": request.data["password"],
+                },
+            )
+            token_serializer.is_valid(raise_exception=True)
+            tokens = token_serializer.validated_data
+
+            return Response(
+                {
+                    "access": tokens["access"],
+                    "refresh": tokens["refresh"],
+                    "message": "User Logged In Successfully",
+                },
+                status.HTTP_200_OK,
+            )
+        except Exception as error:  # noqa: BLE001
+            return Response(
+                {
+                    "message": str(error),
+                },
+                status.HTTP_400_BAD_REQUEST,
+            )
+>>>>>>> 2f2c36fb299e391bd3fb2c162bd9a3e779f0001c
 
 
 class LoginView(TokenObtainPairView):
     serializer_class = TokenObtainPairSerializer
     permission_classes = [AllowAny]
 
+<<<<<<< HEAD
+=======
+    def post(self, request: Request) -> Response:
+        try:
+            token_serializer = TokenObtainPairSerializer(data=request.data)
+            token_serializer.is_valid(raise_exception=True)
+            tokens = token_serializer.validated_data
+
+            if not isinstance(tokens, dict):
+                return Response(
+                    {
+                        "message": "Invalid Credentials",
+                    },
+                    status.HTTP_400_BAD_REQUEST,
+                )
+
+            return Response(
+                {
+                    "access": tokens["access"],
+                    "refresh": tokens["refresh"],
+                    "message": "User Logged In Successfully",
+                },
+                status.HTTP_200_OK,
+            )
+        except AuthenticationFailed:
+            return Response(
+                {
+                    "message": "Invalid Credentials",
+                },
+                status.HTTP_401_UNAUTHORIZED,
+            )
+        except Exception as error:  # noqa: BLE001
+            return Response(
+                {
+                    "message": str(error),
+                },
+                status.HTTP_400_BAD_REQUEST,
+            )
+
+>>>>>>> 2f2c36fb299e391bd3fb2c162bd9a3e779f0001c
 
 class LogoutView(generics.GenericAPIView):
     serializer_class = CustomTokenRefreshSerializer
@@ -80,8 +181,27 @@ class LogoutView(generics.GenericAPIView):
 
     def post(self, request: Request) -> Response:
         try:
+<<<<<<< HEAD
             refresh_token = request.data["refresh"]
             token = RefreshToken(refresh_token)
+=======
+            refresh_token: Token | None = request.data["refresh"]  # type: ignore
+            token = RefreshToken(refresh_token)
+            if not token:
+                return Response(
+                    {
+                        "message": "Refresh token is required",
+                    },
+                    status.HTTP_400_BAD_REQUEST,
+                )
+            if token.check_blacklist():
+                return Response(
+                    {
+                        "message": "Token is already blacklisted",
+                    },
+                    status.HTTP_409_CONFLICT,
+                )
+>>>>>>> 2f2c36fb299e391bd3fb2c162bd9a3e779f0001c
             token.blacklist()
 
             return Response(

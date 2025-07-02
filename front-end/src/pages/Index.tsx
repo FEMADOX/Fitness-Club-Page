@@ -19,7 +19,6 @@ const Index = () => {
       <Trainers />
       <Testimonials/>
       <SuscribeSection />  
-      <FooterSection />
     </main>
   );
 };
