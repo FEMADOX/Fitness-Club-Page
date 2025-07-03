@@ -1,21 +1,14 @@
 from django.contrib.auth import get_user_model
 from rest_framework import generics, status, viewsets
 from rest_framework.decorators import action
-<<<<<<< HEAD
-=======
 from rest_framework.exceptions import AuthenticationFailed, ValidationError
->>>>>>> 2f2c36fb299e391bd3fb2c162bd9a3e779f0001c
 from rest_framework.permissions import AllowAny
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework_simplejwt.exceptions import TokenError
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-<<<<<<< HEAD
-from rest_framework_simplejwt.tokens import RefreshToken
-=======
 from rest_framework_simplejwt.tokens import RefreshToken, Token
->>>>>>> 2f2c36fb299e391bd3fb2c162bd9a3e779f0001c
 from rest_framework_simplejwt.views import TokenObtainPairView
 
 from common.permissions import IsUserOrAdmin
@@ -64,18 +57,6 @@ class SignUpView(generics.CreateAPIView):
 
     def post(self, request: Request) -> Response:
         serializer = self.get_serializer(data=request.data)
-<<<<<<< HEAD
-        serializer.is_valid(raise_exception=True)
-
-        user = serializer.save()
-        return Response(
-            {
-                "user": UserSerializer(user).data,
-                "message": "User Created Successfully",
-            },
-            status.HTTP_201_CREATED,
-        )
-=======
         try:
             serializer.is_valid(raise_exception=True)
 
@@ -126,15 +107,12 @@ class SignUpView(generics.CreateAPIView):
                 },
                 status.HTTP_400_BAD_REQUEST,
             )
->>>>>>> 2f2c36fb299e391bd3fb2c162bd9a3e779f0001c
 
 
 class LoginView(TokenObtainPairView):
     serializer_class = TokenObtainPairSerializer
     permission_classes = [AllowAny]
 
-<<<<<<< HEAD
-=======
     def post(self, request: Request) -> Response:
         try:
             token_serializer = TokenObtainPairSerializer(data=request.data)
@@ -172,7 +150,6 @@ class LoginView(TokenObtainPairView):
                 status.HTTP_400_BAD_REQUEST,
             )
 
->>>>>>> 2f2c36fb299e391bd3fb2c162bd9a3e779f0001c
 
 class LogoutView(generics.GenericAPIView):
     serializer_class = CustomTokenRefreshSerializer
@@ -181,10 +158,6 @@ class LogoutView(generics.GenericAPIView):
 
     def post(self, request: Request) -> Response:
         try:
-<<<<<<< HEAD
-            refresh_token = request.data["refresh"]
-            token = RefreshToken(refresh_token)
-=======
             refresh_token: Token | None = request.data["refresh"]  # type: ignore
             token = RefreshToken(refresh_token)
             if not token:
@@ -201,7 +174,6 @@ class LogoutView(generics.GenericAPIView):
                     },
                     status.HTTP_409_CONFLICT,
                 )
->>>>>>> 2f2c36fb299e391bd3fb2c162bd9a3e779f0001c
             token.blacklist()
 
             return Response(

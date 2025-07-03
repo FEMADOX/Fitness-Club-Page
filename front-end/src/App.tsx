@@ -9,6 +9,7 @@ import Logout from './components/Logout'
 import { ProtectedRegistrationRoute, ProtectedRoute } from './components/ProtectedRoute'
 import RegistrationForm from './components/RegistrationForm'
 import { LOGIN_URL, REGISTER_URL } from './api/constants'
+import { Toaster } from 'sonner'
 
 function App() {
   const protectedRoute = (children: JSX.Element, url: string) => {
@@ -43,6 +44,14 @@ function App() {
           <Route component={NotFound} />
         </Switch>
         <FooterSection />
+        <Toaster
+          position="bottom-right"
+          richColors
+          closeButton
+          toastOptions={{
+            duration: 10000
+          }}
+        />
       </div>
     </ThemeProvider>
   )
