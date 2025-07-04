@@ -14,10 +14,11 @@ class IsUserOrAdmin(BasePermission):
             user_id = RefreshToken(refresh_token).get("user_id")
 
             if not user_id:
-                return user.is_staff
+                return hasattr(user, "is_staff")
 
             return bool(
-                (user.is_authenticated and user.pk == int(user_id)) or user.is_staff,
+                (user.is_authenticated and user.pk == int(user_id))
+                or hasattr(user, "is_staff"),
             )
         except User.DoesNotExist:
             return False

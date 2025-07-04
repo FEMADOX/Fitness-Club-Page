@@ -4,11 +4,10 @@ import { ACCESS_TOKEN, REFRESH_TOKEN, REFRESH_URL } from '@/api/constants'
 import useAuthStore from '@/stores/authStore'
 import { useEffect } from 'react'
 import { jwtDecode } from 'jwt-decode'
-import { Redirect, useLocation } from 'wouter'
+import { Redirect } from 'wouter'
 
 const ProtectedRoute = ({ children, url }) => {
   const { isAuthorized, setIsAuthorized } = useAuthStore()
-  const [, navigate] = useLocation()
 
   useEffect(() => {
     auth().catch(() => setIsAuthorized(false))
@@ -57,7 +56,6 @@ const ProtectedRoute = ({ children, url }) => {
 
 const ProtectedRegistrationRoute = ({ children, url }) => {
   const { isAuthorized, setIsAuthorized } = useAuthStore()
-  const [, navigate] = useLocation()
 
   useEffect(() => {
     auth().catch(() => setIsAuthorized(false))

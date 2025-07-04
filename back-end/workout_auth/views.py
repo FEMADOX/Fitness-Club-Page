@@ -60,7 +60,7 @@ class SignUpView(generics.CreateAPIView):
         try:
             serializer.is_valid(raise_exception=True)
 
-            user = serializer.save()
+            serializer.save()
 
             # Generate JWT tokens for the new user
             token_serializer = TokenObtainPairSerializer(
@@ -74,7 +74,6 @@ class SignUpView(generics.CreateAPIView):
 
             return Response(
                 {
-                    "user": UserSerializer(user).data,
                     "access": tokens["access"],
                     "refresh": tokens["refresh"],
                     "message": "User Created and Logged In Successfully",
@@ -131,7 +130,7 @@ class LoginView(TokenObtainPairView):
                 {
                     "access": tokens["access"],
                     "refresh": tokens["refresh"],
-                    "message": "User Logged In Successfully",
+                    "message": "User Logged Successfully",
                 },
                 status.HTTP_200_OK,
             )
@@ -160,13 +159,6 @@ class LogoutView(generics.GenericAPIView):
         try:
             refresh_token: Token | None = request.data["refresh"]  # type: ignore
             token = RefreshToken(refresh_token)
-            if not token:
-                return Response(
-                    {
-                        "message": "Refresh token is required",
-                    },
-                    status.HTTP_400_BAD_REQUEST,
-                )
             if token.check_blacklist():
                 return Response(
                     {
@@ -182,17 +174,24 @@ class LogoutView(generics.GenericAPIView):
                 },
                 status.HTTP_200_OK,
             )
-        except KeyError:
-            return Response(
-                {
-                    "message": "Refresh token is required",
-                },
-                status.HTTP_400_BAD_REQUEST,
-            )
+        # except KeyError:
+        #     return Response(
+        #         {
+        #             "message": "Refresh token is required",
+        #         },
+        #         status.HTTP_400_BAD_REQUEST,
+        #     )
         except TokenError:
             return Response(
                 {
                     "message": "Token is invalid or expired",
+                },
+                status.HTTP_400_BAD_REQUEST,
+            )
+        except Exception as error:  # noqa: BLE001
+            return Response(
+                {
+                    "message": str(error),
                 },
                 status.HTTP_400_BAD_REQUEST,
             )

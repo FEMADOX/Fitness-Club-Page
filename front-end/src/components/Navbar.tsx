@@ -2,7 +2,7 @@ import { Menu } from 'lucide-react'
 import { X } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { Link, useLocation } from 'wouter'
-import { ThemeToggle } from './theme-toggle'
+import { ThemeToggle } from '@/components'
 import { Button } from './ui/button'
 import useAuthStore from '@/stores/authStore'
 

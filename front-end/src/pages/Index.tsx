@@ -1,13 +1,10 @@
-
-import React from "react";
-import Navbar from "@/components/Navbar";
-import Hero from "@/components/Hero";
-import Services from "@/components/Services";
-import ActiveSection from "@/components/ActiveSection";
-import Trainers from "@/components/Trainers";
-import Testimonials from "@/components/Testimonials";
-import SuscribeSection from "@/components/SuscribeSection";
-import FooterSection from "@/components/Footer";
+import Navbar from '@/components/Navbar'
+import Hero from '@/components/Hero'
+import Services from '@/components/Services'
+import ActiveSection from '@/components/ActiveSection'
+import Trainers from '@/components/Trainers'
+import Testimonials from '@/components/Testimonials'
+import SuscribeSection from '@/components/SubcribeSection'
 
 const Index = () => {
   return (
@@ -17,10 +14,10 @@ const Index = () => {
       <Services />
       <ActiveSection />
       <Trainers />
-      <Testimonials/>
-      <SuscribeSection />  
+      <Testimonials />
+      <SuscribeSection />
     </main>
-  );
-};
+  )
+}
 
-export default Index;
+export default Index

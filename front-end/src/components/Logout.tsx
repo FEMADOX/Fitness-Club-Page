@@ -1,6 +1,8 @@
 import api from '@/api/api'
 import { LOGOUT_URL } from '@/api/constants'
 import useAuthStore from '@/stores/authStore'
+import { APIResponse } from '@/utils/types'
+import { AxiosError } from 'axios'
 import { useEffect, useState } from 'react'
 import { Redirect } from 'wouter'
 
@@ -10,7 +12,7 @@ const Logout = () => {
 
   useEffect(() => {
     const logout = async () => {
-      if (!isAuthorized) return 
+      if (!isAuthorized) return
 
       const refreshToken = localStorage.getItem('refresh')
 
@@ -26,8 +28,11 @@ const Logout = () => {
           setRedirect(true)
         }
       } catch (error) {
-        console.error('Logout failed:', error)
-        console.log(error.response.data)
+        // console.error('Logout failed:', error)
+        if (error instanceof AxiosError) {
+          if (error.response?.status === 400) localStorage.clear()
+          console.error('Error response:', (error.response as APIResponse).data.message)
+        }
         setRedirect(true)
       }
     }

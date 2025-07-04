@@ -1,91 +1,46 @@
-import api from '@/api/api'
 import { GoogleIcon } from '@/components/ui/google-logo'
-import useAuthStore from '@/stores/authStore'
+import { useLogin, useRegister } from '@/hooks/auth'
+import { schema } from '@/utils/formSchema'
+import { BaseFormData, RegistrationFormProps } from '@/utils/interfaces'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { AlertCircleIcon, Eye, EyeOff } from 'lucide-react'
 import { useState } from 'react'
 import { SubmitHandler, useForm } from 'react-hook-form'
-import { Link, useLocation } from 'wouter'
-import { z } from 'zod'
+import { Link } from 'wouter'
 import { Alert, AlertDescription, AlertTitle } from './ui/alert'
-import { toast } from 'sonner'
 
-type FormData = {
-  username: string
-  password: string
-}
-
-const schema = z.object({
-  username: z
-    .string()
-    .min(1, { message: 'Required*' })
-    .min(3, { message: 'Username must be at least 3 characters long' })
-    .max(25, { message: 'Username must be at most 25 characters long' })
-    .regex(/^[a-zA-Z0-9_]+$/, {
-      message: 'Username can only contain letters, numbers, and underscores'
-    })
-    .regex(/^\S+$/, { message: 'Username must not contain spaces' }),
-  password: z
-    .string()
-    .min(1, { message: 'Required*' })
-    .min(6, { message: 'Password must be at least 6 characters long' })
-    .max(100, { message: 'Password must be at most 100 characters long' })
-    .regex(/(?=.*[a-z])/, { message: 'Password must contain at least one lowercase letter' })
-    .regex(/(?=.*[A-Z])/, { message: 'Password must contain at least one uppercase letter' })
-    .regex(/(?=.*\d)/, { message: 'Password must contain at least one number' })
-})
-
-const RegistrationForm = ({ apiUrl, registerUrl }: { apiUrl: string; registerUrl: string }) => {
+const RegistrationForm = ({ registerUrl }: RegistrationFormProps) => {
   // Hooks
   const {
     register,
     handleSubmit,
-    formState: { errors, isSubmitting }
-  } = useForm<FormData>({
+    formState: { errors }
+  } = useForm<BaseFormData>({
     resolver: zodResolver(schema),
     defaultValues: {
       username: '',
       password: ''
     }
   })
-  const [, navigate] = useLocation()
-  const setIsAuthorized = useAuthStore(state => state.setIsAuthorized)
   const [invalidCreds, setInvalidCredentials] = useState(null)
   const [showPassword, setShowPassword] = useState(false)
 
+  // Mutations based on the route
+  const loginMutation = useLogin()
+  const registerMutation = useRegister()
+
+  const isLogin = registerUrl === '/login'
+  const { isPending, mutate } = isLogin ? loginMutation : registerMutation
+
   // Handlers
-  const onSubmit: SubmitHandler<FormData> = async data => {
-    const { username, password } = data
+  const onSubmit: SubmitHandler<BaseFormData> = async data => {
+    setInvalidCredentials(false)
 
-    try {
-      const response = await api.post(apiUrl, { username, password })
-      if (response.status === 200) {
-        localStorage.setItem('access', response.data.access)
-        localStorage.setItem('refresh', response.data.refresh)
-
-        setIsAuthorized(true)
-
-        const message = registerUrl === '/login' ? 'Login successful' : 'Registration successful'
-        toast.success(message, {
-          description: 'You are now logged in.'
-        })
-
-        navigate('/')
+    mutate(data, {
+      onError: error => {
+        if (error.response && error.response.status === 401) setInvalidCredentials(true)
       }
-      if (response.status > 399) {
-        toast.error('Failed to register', {
-          description: 'Please try again later or contact support.'
-        })
-        console.error(response.statusText)
-        navigate(registerUrl)
-      }
-    } catch (error) {
-      if (error.response && error.response.status === 401) setInvalidCredentials(true)
-      else
-        toast.error('An error occurred', {
-          description: `Please try again later or contact support.\nError: ${error}`
-        })
-    }
+    })
   }
 
   const handleGoogleLogin = () => {
@@ -125,7 +80,7 @@ const RegistrationForm = ({ apiUrl, registerUrl }: { apiUrl: string; registerUrl
       <div className="container mx-auto px-4">
         <div className="max-w-md mx-auto bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8">
           <h1 className="text-3xl font-bold text-center mb-8 text-gray-900 dark:text-white">
-            {registerUrl === '/login' ? 'Welcome Back' : 'Create an Account'}
+            {isLogin ? 'Welcome Back' : 'Create an Account'}
           </h1>
 
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
@@ -143,6 +98,7 @@ const RegistrationForm = ({ apiUrl, registerUrl }: { apiUrl: string; registerUrl
                 className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent dark:bg-gray-700 dark:text-white"
                 {...register('username')}
                 onChange={clearInvalidCreds('username')}
+                disabled={isPending}
               />
               {errors.username && (
                 <p className="text-red-500 text-sm mb-2">{errors.username.message}</p>
@@ -164,6 +120,7 @@ const RegistrationForm = ({ apiUrl, registerUrl }: { apiUrl: string; registerUrl
                   className="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent dark:bg-gray-700 dark:text-white"
                   {...register('password')}
                   onChange={clearInvalidCreds('password')}
+                  disabled={isPending}
                 />
                 <button
                   type="button"
@@ -179,7 +136,7 @@ const RegistrationForm = ({ apiUrl, registerUrl }: { apiUrl: string; registerUrl
             </div>
 
             {renderRegistrationMessage()}
-            {registerUrl === '/login' && (
+            {isLogin && (
               <>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center">
@@ -198,9 +155,9 @@ const RegistrationForm = ({ apiUrl, registerUrl }: { apiUrl: string; registerUrl
                   </div>
 
                   <div className="text-sm">
-                    <a href="#" className="text-primary hover:text-red-400 transition-colors">
+                    <Link href="#" className="text-primary hover:text-red-400 transition-colors">
                       Forgot your password?
-                    </a>
+                    </Link>
                   </div>
                 </div>
               </>
@@ -209,9 +166,9 @@ const RegistrationForm = ({ apiUrl, registerUrl }: { apiUrl: string; registerUrl
             <button
               type="submit"
               className="w-full btn-primary disabled:cursor-not-allowed disabled:opacity-50"
-              disabled={isSubmitting}
+              disabled={isPending}
             >
-              {isSubmitting ? (
+              {isPending ? (
                 <span className="flex justify-center items-center w-full">
                   <svg
                     className="animate-spin h-5 w-5 text-white"
@@ -234,13 +191,14 @@ const RegistrationForm = ({ apiUrl, registerUrl }: { apiUrl: string; registerUrl
                     ></path>
                   </svg>
                 </span>
-              ) : registerUrl === '/login' ? (
+              ) : isLogin ? (
                 'Login'
               ) : (
                 'Register'
               )}
             </button>
 
+            {/* Divider */}
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
                 <div className="w-full border-t border-gray-300 dark:border-gray-600"></div>
@@ -252,6 +210,7 @@ const RegistrationForm = ({ apiUrl, registerUrl }: { apiUrl: string; registerUrl
               </div>
             </div>
 
+            {/* Gooogle button */}
             <button
               type="button"
               onClick={handleGoogleLogin}
@@ -262,13 +221,14 @@ const RegistrationForm = ({ apiUrl, registerUrl }: { apiUrl: string; registerUrl
             </button>
           </form>
 
+          {/* Bottom Link */}
           <p className="mt-4 text-center text-sm text-gray-600 dark:text-gray-400">
-            {registerUrl === '/login' ? "Don't have an account?" : 'Already have an account?'}{' '}
+            {isLogin ? "Don't have an account?" : 'Already have an account?'}{' '}
             <Link
-              href={registerUrl === '/login' ? '/register' : '/login'}
+              href={isLogin ? '/register' : '/login'}
               className="text-primary hover:text-red-400 transition-colors"
             >
-              {registerUrl === '/login' ? 'Create an account' : 'Log in'}
+              {isLogin ? 'Create an account' : 'Log in'}
             </Link>
           </p>
         </div>

@@ -1,5 +1,3 @@
-import React from "react";
-
 const ActiveSection = () => {
   return (
     <section className="py-20 bg-white dark:bg-gray-900">
