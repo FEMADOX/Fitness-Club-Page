@@ -1,27 +1,3 @@
-<<<<<<< HEAD
-import { useState } from "react";
-import { Link } from "wouter";
-
-const Register = () => {
-  const [formData, setFormData] = useState({
-    username: "",
-    password: "",
-  });
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    // TODO: Implement registration logic
-    console.log("Form submitted:", formData);
-  };
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
-  };
-=======
 import api from '@/api/api'
 import { REGISTER_URL } from '@/api/constants'
 import { GoogleIcon } from '@/components/ui/google-logo'
@@ -79,19 +55,11 @@ const Register = () => {
     // TODO: Implement Google login logic
     console.log('Google login clicked')
   }
->>>>>>> 2f2c36fb299e391bd3fb2c162bd9a3e779f0001c
 
   return (
     <section className="min-h-screen bg-white dark:bg-gray-900 pt-32 pb-20">
       <div className="container mx-auto px-4">
         <div className="max-w-md mx-auto bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8">
-<<<<<<< HEAD
-          <h1 className="text-3xl font-bold text-center mb-8 text-gray-900 dark:text-white">Create Account</h1>
-          
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div>
-              <label htmlFor="username" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-=======
           <h1 className="text-3xl font-bold text-center mb-8 text-gray-900 dark:text-white">
             Create Account
           </h1>
@@ -102,7 +70,6 @@ const Register = () => {
                 htmlFor="username"
                 className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
               >
->>>>>>> 2f2c36fb299e391bd3fb2c162bd9a3e779f0001c
                 Username
               </label>
               <input
@@ -117,14 +84,10 @@ const Register = () => {
             </div>
 
             <div>
-<<<<<<< HEAD
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-=======
               <label
                 htmlFor="password"
                 className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
               >
->>>>>>> 2f2c36fb299e391bd3fb2c162bd9a3e779f0001c
                 Password
               </label>
               <input
@@ -138,18 +101,6 @@ const Register = () => {
               />
             </div>
 
-<<<<<<< HEAD
-            <button
-              type="submit"
-              className="w-full btn-primary"
-            >
-              Register
-            </button>
-          </form>
-
-          <p className="mt-4 text-center text-sm text-gray-600 dark:text-gray-400">
-            Already have an account?{" "}
-=======
             <button type="submit" className="w-full btn-primary">
               Register
             </button>
@@ -177,7 +128,6 @@ const Register = () => {
 
           <p className="mt-4 text-center text-sm text-gray-600 dark:text-gray-400">
             Already have an account?{' '}
->>>>>>> 2f2c36fb299e391bd3fb2c162bd9a3e779f0001c
             <Link href="/login" className="text-primary hover:text-primary-dark">
               Sign in
             </Link>
@@ -185,14 +135,7 @@ const Register = () => {
         </div>
       </div>
     </section>
-<<<<<<< HEAD
-  );
-};
-
-export default Register; 
-=======
   )
 }
 
 export default Register
->>>>>>> 2f2c36fb299e391bd3fb2c162bd9a3e779f0001c
