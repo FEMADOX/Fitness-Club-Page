@@ -1,3 +1,4 @@
+pnpm*.yaml
 # Logs
 logs
 *.log
