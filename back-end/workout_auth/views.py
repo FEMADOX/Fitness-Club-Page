@@ -56,17 +56,96 @@ class SignUpView(generics.CreateAPIView):
     permission_classes = [AllowAny]
 
     def post(self, request: Request) -> Response:
-        serializer = self.get_serializer(data=request.data)
+        username = request.data.get("username")
+        password = request.data.get("password")
+
+        if not username or not password:
+            return Response(
+                {
+                    "message": "Username and password are required",
+                },
+                status.HTTP_406_NOT_ACCEPTABLE,
+            )
+
+        User = get_user_model()  # noqa: N806
+
+        if User.objects.get(username=username, password=password):
+            return self._login_existing_user(username, password)
+
+        user_data = self._create_new_user(username, password)
+
+        if user_data.status_code == status.HTTP_201_CREATED:
+            return self._login_existing_user(
+                user_data.data["access"],  # type: ignore
+                user_data.data["refresh"],  # type: ignore
+            )
+
+        return user_data
+
+    def _create_new_user(self, username: str, password: str) -> Response:
+        """Create a new user.
+
+        Args:
+            request (Request): The request object containing user data.
+
+        Returns:
+            Response: The response object containing the result of the user creation.
+            Response -> {
+                "username": str,  # Access token
+                "refresh": str,  # Refresh token
+                "message": str,  # Success message
+            }
+        """
+        user_data = {"username": username, "password": password}
+        serializer = self.get_serializer(data=user_data)
         try:
             serializer.is_valid(raise_exception=True)
 
             serializer.save()
 
-            # Generate JWT tokens for the new user
+            return Response(
+                {
+                    "username": username,
+                    "password": password,
+                    "message": "User Created Successfully",
+                },
+                status.HTTP_201_CREATED,
+            )
+        except ValidationError as error:
+            return Response(
+                {
+                    "message": str(error),
+                },
+                status.HTTP_400_BAD_REQUEST,
+            )
+        except Exception as error:  # noqa: BLE001
+            return Response(
+                {
+                    "message": str(error),
+                },
+                status.HTTP_400_BAD_REQUEST,
+            )
+
+    def _login_existing_user(self, username: str, password: str) -> Response:
+        """Log in an existing user and return their tokens.
+
+        Args:
+            username (str): The username of the user.
+            password (str): The password of the user.
+
+        Returns:
+            Response: A response containing the user's tokens or an error message.
+            Response -> {
+                "access": str,  # Access token
+                "refresh": str,  # Refresh token
+                "message": str,  # Success message
+            }
+        """
+        try:
             token_serializer = TokenObtainPairSerializer(
                 data={
-                    "username": request.data["username"],
-                    "password": request.data["password"],
+                    "username": username,
+                    "password": password,
                 },
             )
             token_serializer.is_valid(raise_exception=True)
@@ -76,28 +155,23 @@ class SignUpView(generics.CreateAPIView):
                 {
                     "access": tokens["access"],
                     "refresh": tokens["refresh"],
-                    "message": "User Created and Logged In Successfully",
+                    "message": "User Logged Successfully",
                 },
                 status.HTTP_200_OK,
             )
-        # User Already Exists
-        except ValidationError:
-            token_serializer = TokenObtainPairSerializer(
-                data={
-                    "username": request.data["username"],
-                    "password": request.data["password"],
-                },
-            )
-            token_serializer.is_valid(raise_exception=True)
-            tokens = token_serializer.validated_data
-
+        except AuthenticationFailed:
             return Response(
                 {
-                    "access": tokens["access"],
-                    "refresh": tokens["refresh"],
-                    "message": "User Logged In Successfully",
+                    "message": "Invalid Credentials",
                 },
-                status.HTTP_200_OK,
+                status.HTTP_401_UNAUTHORIZED,
+            )
+        except ValidationError as error:
+            return Response(
+                {
+                    "message": str(error),
+                },
+                status.HTTP_400_BAD_REQUEST,
             )
         except Exception as error:  # noqa: BLE001
             return Response(
@@ -117,14 +191,6 @@ class LoginView(TokenObtainPairView):
             token_serializer = TokenObtainPairSerializer(data=request.data)
             token_serializer.is_valid(raise_exception=True)
             tokens = token_serializer.validated_data
-
-            if not isinstance(tokens, dict):
-                return Response(
-                    {
-                        "message": "Invalid Credentials",
-                    },
-                    status.HTTP_400_BAD_REQUEST,
-                )
 
             return Response(
                 {
@@ -186,7 +252,7 @@ class LogoutView(generics.GenericAPIView):
                 {
                     "message": "Token is invalid or expired",
                 },
-                status.HTTP_400_BAD_REQUEST,
+                status.HTTP_406_NOT_ACCEPTABLE,
             )
         except Exception as error:  # noqa: BLE001
             return Response(
