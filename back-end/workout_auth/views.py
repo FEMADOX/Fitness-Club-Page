@@ -69,16 +69,24 @@ class SignUpView(generics.CreateAPIView):
 
         User = get_user_model()  # noqa: N806
 
-        if User.objects.get(username=username, password=password):
-            return self._login_existing_user(username, password)
+        try:
+            existing_user = User.objects.get(username=username)
+            if existing_user.check_password(password):
+                return self._login_existing_user(username, password)
+
+            return Response(
+                {
+                    "message": "Username unavailable, please choose another one",
+                },
+                status.HTTP_401_UNAUTHORIZED,
+            )
+        except User.DoesNotExist:
+            pass
 
         user_data = self._create_new_user(username, password)
 
         if user_data.status_code == status.HTTP_201_CREATED:
-            return self._login_existing_user(
-                user_data.data["access"],  # type: ignore
-                user_data.data["refresh"],  # type: ignore
-            )
+            return self._login_existing_user(username, password)
 
         return user_data
 
@@ -225,12 +233,19 @@ class LogoutView(generics.GenericAPIView):
         try:
             refresh_token: Token | None = request.data["refresh"]  # type: ignore
             token = RefreshToken(refresh_token)
+            if not token:
+                return Response(
+                    {
+                        "message": "Invalid refresh token",
+                    },
+                    status.HTTP_401_UNAUTHORIZED,
+                )
             if token.check_blacklist():
                 return Response(
                     {
                         "message": "Token is already blacklisted",
                     },
-                    status.HTTP_409_CONFLICT,
+                    status.HTTP_406_NOT_ACCEPTABLE,
                 )
             token.blacklist()
 
@@ -240,13 +255,13 @@ class LogoutView(generics.GenericAPIView):
                 },
                 status.HTTP_200_OK,
             )
-        # except KeyError:
-        #     return Response(
-        #         {
-        #             "message": "Refresh token is required",
-        #         },
-        #         status.HTTP_400_BAD_REQUEST,
-        #     )
+        except KeyError:
+            return Response(
+                {
+                    "message": "Refresh token is required",
+                },
+                status.HTTP_401_UNAUTHORIZED,
+            )
         except TokenError:
             return Response(
                 {

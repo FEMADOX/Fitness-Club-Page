@@ -7,9 +7,11 @@ from rest_framework_simplejwt.tokens import RefreshToken, Token
 
 
 class IsUserOrAdmin(BasePermission):
-    def has_permission(self, request: Request, view: APIView) -> bool:  # type: ignore
+    def has_permission(self, request: Request, view: APIView) -> bool:
         try:
             refresh_token: Token | None = request.data.get("refresh")  # type: ignore
+            if not refresh_token:
+                return False
             user = get_user_model().objects.get(pk=request.user.pk)
             user_id = RefreshToken(refresh_token).get("user_id")
 
